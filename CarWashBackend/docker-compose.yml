@@ -1,0 +1,16 @@
+﻿version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_carwash
+    environment:
+      MYSQL_ROOT_PASSWORD: "P@ssWord.123"
+      MYSQL_DATABASE: "Carwash"
+    ports:
+      - "3306:3306"
+    volumes:
+      - carwash_db_data:/var/lib/mysql
+
+volumes:
+  carwash_db_data:
