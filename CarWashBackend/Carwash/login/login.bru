@@ -1,0 +1,26 @@
+meta {
+  name: login
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:5048/api/Login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "usuario": "erick.reyes",
+    "contrasena": "Erick.123"
+  }
+}
+
+script:post-response {
+  if(res.status==200){
+  const response=res.getBody();
+    const token =response.token;
+    bru.setEnvVar("token",token);
+  }
+}

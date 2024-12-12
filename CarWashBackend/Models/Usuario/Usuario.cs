@@ -9,7 +9,7 @@ public partial class Usuario
 {
     public string id { get; set; }
 
-    public string usuario1 { get; set; }
+    public string usuario { get; set; }
 
     public string correo { get; set; }
 

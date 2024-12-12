@@ -14,7 +14,7 @@ public class UsuarioConfig : IEntityTypeConfiguration<Usuario>
 
         builder.HasIndex(e => e.empleado_id, "empleado_id");
 
-        builder.HasIndex(e => e.usuario1, "usuario").IsUnique();
+        builder.HasIndex(e => e.usuario, "usuario").IsUnique();
 
         builder.Property(e => e.id).HasMaxLength(36);
         builder.Property(e => e.contrasena)
@@ -31,7 +31,7 @@ public class UsuarioConfig : IEntityTypeConfiguration<Usuario>
             .ValueGeneratedOnAddOrUpdate()
             .HasDefaultValueSql("CURRENT_TIMESTAMP")
             .HasColumnType("datetime");
-        builder.Property(e => e.usuario1)
+        builder.Property(e => e.usuario)
             .IsRequired()
             .HasMaxLength(50)
             .HasColumnName("usuario");
