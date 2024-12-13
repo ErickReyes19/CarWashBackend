@@ -21,9 +21,11 @@ public partial class Usuario
 
     public DateTime? updated_at { get; set; }
 
+    public string role_id { get; set; }
+
     public virtual ICollection<RegistroServicio> RegistroServicios { get; set; } = new List<RegistroServicio>();
 
     public virtual Empleado empleado { get; set; }
 
-    public virtual ICollection<Role> rols { get; set; } = new List<Role>();
+    public virtual Role role { get; set; }
 }

@@ -39,19 +39,15 @@
          "ObjectType": 0
       },
       {
-         "Name": "Roles",
+         "Name": "Role",
          "ObjectType": 0
       },
       {
-         "Name": "RolPermisos",
+         "Name": "RolePermisos",
          "ObjectType": 0
       },
       {
          "Name": "Servicios",
-         "ObjectType": 0
-      },
-      {
-         "Name": "UsuarioRoles",
          "ObjectType": 0
       },
       {

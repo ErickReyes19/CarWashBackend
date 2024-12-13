@@ -1,0 +1,27 @@
+meta {
+  name: putCliente
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:5048/api/Cliente/f66af386-7e8e-44d6-83df-7a129052811e
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id": "f66af386-7e8e-44d6-83df-7a129052811e",
+    "nombre": "Juan Pérez Actualizado 2",
+    "correo": "juan.perez.nuevo@email.com",
+    "telefono": "0987654321",
+    "genero": "Masculino",
+    "activo": false
+  }
+  
+}

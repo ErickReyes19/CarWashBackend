@@ -1,0 +1,25 @@
+meta {
+  name: postcliente
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:5048/api/Cliente
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "nombre": "Juan Pérez",
+    "correo": "juan.perez@email.com",
+    "telefono": "1234567890",
+    "genero": "Masculino"
+  }
+  
+}
