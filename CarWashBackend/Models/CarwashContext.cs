@@ -76,6 +76,8 @@ public partial class CarwashContext : DbContext
 
             entity.HasIndex(e => e.correo, "correo1").IsUnique();
 
+            entity.HasIndex(e => e.usuario_id, "usuario_id").IsUnique();
+
             entity.Property(e => e.id).HasMaxLength(36);
             entity.Property(e => e.activo).HasDefaultValueSql("'1'");
             entity.Property(e => e.apellido)
@@ -92,6 +94,12 @@ public partial class CarwashContext : DbContext
             entity.Property(e => e.updated_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
+            entity.Property(e => e.usuario_id).HasMaxLength(36);
+
+            entity.HasOne(d => d.usuario).WithOne(p => p.Empleado)
+                .HasForeignKey<Empleado>(d => d.usuario_id)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Empleado_Usuario");
         });
 
         modelBuilder.Entity<EstadosServicio>(entity =>
@@ -286,7 +294,7 @@ public partial class CarwashContext : DbContext
 
             entity.HasIndex(e => e.role_id, "FK_Usuario_Role");
 
-            entity.HasIndex(e => e.correo, "correo2").IsUnique();
+            entity.HasIndex(e => e.correo, "correo").IsUnique();
 
             entity.HasIndex(e => e.empleado_id, "empleado_id");
 
@@ -315,7 +323,7 @@ public partial class CarwashContext : DbContext
             entity.HasOne(d => d.empleado).WithMany(p => p.Usuarios)
                 .HasForeignKey(d => d.empleado_id)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("Usuarios_ibfk_1");
+                .HasConstraintName("FK_Usuario_Empleado");
 
             entity.HasOne(d => d.role).WithMany(p => p.Usuarios)
                 .HasForeignKey(d => d.role_id)

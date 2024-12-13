@@ -23,6 +23,8 @@ public partial class Usuario
 
     public string role_id { get; set; }
 
+    public virtual Empleado Empleado { get; set; }
+
     public virtual ICollection<RegistroServicio> RegistroServicios { get; set; } = new List<RegistroServicio>();
 
     public virtual Empleado empleado { get; set; }
