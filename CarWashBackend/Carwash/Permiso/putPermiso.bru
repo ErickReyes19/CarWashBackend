@@ -1,0 +1,25 @@
+meta {
+  name: putPermiso
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:5048/api/Permiso/741ec15c-0d8d-436b-ba38-0b6f16c3b652
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id":"741ec15c-0d8d-436b-ba38-0b6f16c3b652",
+    "nombre": "Acceso_Reporte_Financiero",
+    "descripcion": "Permiso para acceder a los reportes financieros del sistema",
+    "activo": false
+  }
+  
+}

@@ -17,5 +17,7 @@ public partial class Permiso
 
     public DateTime? updated_at { get; set; }
 
+    public bool? activo { get; set; }
+
     public virtual ICollection<Role> rols { get; set; } = new List<Role>();
 }

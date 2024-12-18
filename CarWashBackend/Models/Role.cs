@@ -17,6 +17,8 @@ public partial class Role
 
     public DateTime? updated_at { get; set; }
 
+    public bool? activo { get; set; }
+
     public virtual ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();
 
     public virtual ICollection<Permiso> permisos { get; set; } = new List<Permiso>();

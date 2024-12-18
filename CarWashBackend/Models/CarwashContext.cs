@@ -149,6 +149,7 @@ public partial class CarwashContext : DbContext
             entity.HasIndex(e => e.nombre, "nombre").IsUnique();
 
             entity.Property(e => e.id).HasMaxLength(36);
+            entity.Property(e => e.activo).HasDefaultValueSql("'1'");
             entity.Property(e => e.created_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
@@ -230,13 +231,14 @@ public partial class CarwashContext : DbContext
             entity.ToTable("Role");
 
             entity.Property(e => e.id).HasMaxLength(36);
+            entity.Property(e => e.activo).HasDefaultValueSql("'1'");
             entity.Property(e => e.created_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
             entity.Property(e => e.descripcion).HasColumnType("text");
             entity.Property(e => e.nombre)
                 .IsRequired()
-                .HasMaxLength(50);
+                .HasMaxLength(100);
             entity.Property(e => e.updated_at)
                 .ValueGeneratedOnAddOrUpdate()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
