@@ -11,8 +11,6 @@ public partial class Usuario
 
     public string usuario1 { get; set; }
 
-    public string correo { get; set; }
-
     public string contrasena { get; set; }
 
     public string empleado_id { get; set; }

@@ -290,8 +290,6 @@ public partial class CarwashContext : DbContext
 
             entity.HasIndex(e => e.role_id, "FK_Usuario_Role");
 
-            entity.HasIndex(e => e.correo, "correo2").IsUnique();
-
             entity.HasIndex(e => e.empleado_id, "empleado_id");
 
             entity.HasIndex(e => e.usuario1, "usuario").IsUnique();
@@ -300,9 +298,6 @@ public partial class CarwashContext : DbContext
             entity.Property(e => e.contrasena)
                 .IsRequired()
                 .HasMaxLength(255);
-            entity.Property(e => e.correo)
-                .IsRequired()
-                .HasMaxLength(100);
             entity.Property(e => e.created_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
