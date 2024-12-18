@@ -1,4 +1,5 @@
 ﻿using CarWashBackend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,6 +7,7 @@ namespace CarWashBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // Esto asegura que solo usuarios autenticados puedan acceder
     public class EmpleadoController : ControllerBase
     {
         private readonly CarwashContext _context;
@@ -34,10 +36,26 @@ namespace CarWashBackend.Controllers
                 CreatedAt = e.created_at,
                 UpdatedAt = e.updated_at,
                 // Accedemos directamente al primer (y único) usuario
-                UsuarioNombre = e.Usuarios.FirstOrDefault()?.usuario // El primer usuario asociado
+                UsuarioNombre = e.Usuarios.FirstOrDefault().usuario1 // El primer usuario asociado
             }).ToList();
 
             return Ok(empleadosDTO);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateCliente(Empleado empleado)
+        {
+            if (empleado == null)
+                return BadRequest("Datos inválidos.");
+
+            empleado.id = Guid.NewGuid().ToString();
+            empleado.created_at = DateTime.UtcNow;
+            empleado.updated_at = DateTime.UtcNow;
+
+            _context.Empleados.Add(empleado);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetEmpleadoById), new { id = empleado.id }, empleado);
         }
 
 
@@ -46,23 +64,58 @@ namespace CarWashBackend.Controllers
         public async Task<IActionResult> GetActiveEmpleados()
         {
             var empleadosActivos = await _context.Empleados
-                                                  .Where(e => e.activo == true)
-                                                  .ToListAsync();
-            return Ok(empleadosActivos);
+                .Where(e => e.activo == true)
+                .Include(e => e.Usuarios) // Incluye la relación con Usuarios
+                .ToListAsync();
+
+            var empleadosDTO = empleadosActivos.Select(e => new EmpleadoDTO
+            {
+                Id = e.id,
+                Nombre = e.nombre,
+                Apellido = e.apellido,
+                Correo = e.correo,
+                Edad = e.edad,
+                Genero = e.genero,
+                Activo = e.activo,
+                CreatedAt = e.created_at,
+                UpdatedAt = e.updated_at,
+                UsuarioNombre = e.Usuarios.FirstOrDefault()?.usuario1 // Maneja posibles valores null
+            }).ToList();
+
+            return Ok(empleadosDTO);
         }
+
 
         // GET: api/Empleado/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetEmpleadoById(string id)
         {
             var empleado = await _context.Empleados
-                                         .FirstOrDefaultAsync(e => e.id == id);
+                .Include(e => e.Usuarios) // Incluye la relación con Usuarios
+                .FirstOrDefaultAsync(e => e.id == id);
+
             if (empleado == null)
             {
                 return NotFound($"Empleado con ID {id} no encontrado.");
             }
-            return Ok(empleado);
+
+            var empleadoDTO = new EmpleadoDTO
+            {
+                Id = empleado.id,
+                Nombre = empleado.nombre,
+                Apellido = empleado.apellido,
+                Correo = empleado.correo,
+                Edad = empleado.edad,
+                Genero = empleado.genero,
+                Activo = empleado.activo,
+                CreatedAt = empleado.created_at,
+                UpdatedAt = empleado.updated_at,
+                UsuarioNombre = empleado.Usuarios.FirstOrDefault()?.usuario1 // Maneja posibles valores null
+            };
+
+            return Ok(empleadoDTO);
         }
+
 
         // PUT: api/Empleado/{id}
         [HttpPut("{id}")]

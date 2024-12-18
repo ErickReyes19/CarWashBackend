@@ -9,7 +9,7 @@ public partial class Usuario
 {
     public string id { get; set; }
 
-    public string usuario { get; set; }
+    public string usuario1 { get; set; }
 
     public string correo { get; set; }
 
@@ -22,8 +22,6 @@ public partial class Usuario
     public DateTime? updated_at { get; set; }
 
     public string role_id { get; set; }
-
-    public virtual Empleado Empleado { get; set; }
 
     public virtual ICollection<RegistroServicio> RegistroServicios { get; set; } = new List<RegistroServicio>();
 

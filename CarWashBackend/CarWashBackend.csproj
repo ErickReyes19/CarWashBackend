@@ -28,7 +28,6 @@
   <ItemGroup>
     <Folder Include="Models\EstadoServicio\" />
     <Folder Include="Models\Pago\" />
-    <Folder Include="Models\Permiso\" />
     <Folder Include="Models\RegistroServicio\" />
     <Folder Include="Models\Role\" />
     <Folder Include="Models\Servicio\" />

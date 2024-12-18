@@ -25,9 +25,5 @@ public partial class Empleado
 
     public DateTime? updated_at { get; set; }
 
-    public string usuario_id { get; set; }
-
     public virtual ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();
-
-    public virtual Usuario usuario { get; set; }
 }

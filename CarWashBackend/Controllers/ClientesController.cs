@@ -65,7 +65,8 @@ public class ClienteController : ControllerBase
                                                 Activo = c.activo
                                             })
                                             .ToListAsync();
-
+        if (clientesActivos == null)
+            return NotFound($"Clientes no encontrado.");
         return Ok(clientesActivos);
     }
 
@@ -75,10 +76,21 @@ public class ClienteController : ControllerBase
     {
         var cliente = await _context.Clientes.FindAsync(id);
         if (cliente == null)
-            return NotFound();
+            return NotFound($"Cliente con ID {id} no encontrado.");
 
-        return Ok(cliente);
+        var clienteDTO = new ClienteDTO
+        {
+            Id = cliente.id,
+            Nombre = cliente.nombre,
+            Correo = cliente.correo,
+            Telefono = cliente.telefono,
+            Genero = cliente.genero,
+            Activo = cliente.activo
+        };
+
+        return Ok(clienteDTO);
     }
+
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCliente(string id, Cliente cliente)

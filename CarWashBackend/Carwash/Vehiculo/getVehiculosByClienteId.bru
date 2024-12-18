@@ -1,0 +1,15 @@
+meta {
+  name: getVehiculosByClienteId
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:5048/api/Vehiculo/cliente/93ac8255-0c6e-49df-972d-1dfc502ed61a
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

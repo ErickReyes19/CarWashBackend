@@ -149,14 +149,15 @@ public class VehiculoController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateVehiculo(string id, Vehiculo vehiculo)
     {
+        // Verifica que el ID proporcionado en la URL coincida con el ID del vehículo
         if (id != vehiculo.id)
             return BadRequest("El ID no coincide.");
 
         var existingVehiculo = await _context.Vehiculos.FindAsync(id);
         if (existingVehiculo == null)
-            return NotFound();
+            return NotFound(new { message = "Vehículo no encontrado." });
 
-        // Verificar si ya existe un vehículo con la misma placa, pero que no sea el mismo vehículo
+        // Verificar si la placa ya está registrada en otro vehículo, pero no en el mismo vehículo
         var vehicleWithSamePlaca = await _context.Vehiculos
             .FirstOrDefaultAsync(v => v.placa == vehiculo.placa && v.id != id);
 
@@ -165,14 +166,25 @@ public class VehiculoController : ControllerBase
             return Conflict(new { message = "Ya existe un vehículo con la misma placa." });
         }
 
+        // Verificar si el cliente asociado existe
+        var clienteExistente = await _context.Clientes
+                                              .FirstOrDefaultAsync(c => c.id == vehiculo.cliente_id);
+
+        if (clienteExistente == null)
+        {
+            return NotFound(new { message = "Cliente no encontrado." });
+        }
+
         // Actualizar los datos del vehículo
         existingVehiculo.placa = vehiculo.placa;
         existingVehiculo.modelo = vehiculo.modelo;
         existingVehiculo.marca = vehiculo.marca;
         existingVehiculo.color = vehiculo.color;
         existingVehiculo.activo = vehiculo.activo;
+        existingVehiculo.cliente_id = vehiculo.cliente_id; // Actualizamos el cliente asociado
         existingVehiculo.updated_at = DateTime.UtcNow;
 
+        // Guardar los cambios en la base de datos
         _context.Vehiculos.Update(existingVehiculo);
         await _context.SaveChangesAsync();
 
@@ -187,12 +199,47 @@ public class VehiculoController : ControllerBase
             activo = existingVehiculo.activo,
             created_at = existingVehiculo.created_at,
             updated_at = existingVehiculo.updated_at,
-            ClienteNombre = existingVehiculo.cliente?.nombre  // Obtener nombre del cliente
+            ClienteNombre = clienteExistente?.nombre // Obtener el nombre del cliente asociado
         };
 
         // Retornar el DTO con el vehículo actualizado
         return Ok(vehiculoUpdatedDto);
     }
+
+
+
+    [HttpGet("cliente/{clienteId}")]
+    public async Task<IActionResult> GetVehiculosByClienteId(string clienteId)
+    {
+        var vehiculos = await _context.Vehiculos
+                                       .Include(v => v.cliente)  
+                                       .Where(v => v.cliente.id == clienteId)
+                                       .ToListAsync();
+
+        // Si no se encuentran vehículos, retorna un mensaje indicando que no existen
+        if (vehiculos == null || !vehiculos.Any())
+        {
+            return NotFound(new { message = "No se encontraron vehículos para el cliente con ID " + clienteId });
+        }
+
+        // Crear el DTO para los vehículos encontrados
+        var vehiculosDto = vehiculos.Select(v => new VehiculoDTO
+        {
+            id = v.id,
+            placa = v.placa,
+            modelo = v.modelo,
+            marca = v.marca,
+            color = v.color,
+            activo = v.activo,
+            created_at = v.created_at,
+            updated_at = v.updated_at,
+            ClienteNombre = v.cliente?.nombre
+        }).ToList();
+
+        // Retornar la lista de vehículos en formato DTO
+        return Ok(vehiculosDto);
+    }
+
 
 
 }

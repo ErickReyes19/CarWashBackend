@@ -37,7 +37,7 @@ namespace CarWashBackend.Controllers
             var usuario = await _context.Usuarios
                 .Include(u => u.role) // Incluir el rol
                 .ThenInclude(r => r.permisos) // Incluir los permisos del rol
-                .FirstOrDefaultAsync(u => u.usuario == loginDto.Usuario);
+                .FirstOrDefaultAsync(u => u.usuario1 == loginDto.Usuario);
 
             if (usuario == null)
             {
@@ -52,7 +52,7 @@ namespace CarWashBackend.Controllers
             // Crear los claims para el JWT
             var claims = new List<Claim>
             {
-                new Claim("usuario", usuario.usuario),
+                new Claim("usuario", usuario.usuario1),
                 new Claim("usuarioId", usuario.id)
             };
 

@@ -38,6 +38,8 @@ public partial class CarwashContext : DbContext
 
     public virtual DbSet<Vehiculo> Vehiculos { get; set; }
 
+    public virtual DbSet<__EFMigrationsHistory> __EFMigrationsHistories { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseMySql("server=localhost;database=Carwash;uid=root;pwd=P@ssWord.123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.40-mysql"));
@@ -76,8 +78,6 @@ public partial class CarwashContext : DbContext
 
             entity.HasIndex(e => e.correo, "correo1").IsUnique();
 
-            entity.HasIndex(e => e.usuario_id, "usuario_id").IsUnique();
-
             entity.Property(e => e.id).HasMaxLength(36);
             entity.Property(e => e.activo).HasDefaultValueSql("'1'");
             entity.Property(e => e.apellido)
@@ -94,12 +94,6 @@ public partial class CarwashContext : DbContext
             entity.Property(e => e.updated_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
-            entity.Property(e => e.usuario_id).HasMaxLength(36);
-
-            entity.HasOne(d => d.usuario).WithOne(p => p.Empleado)
-                .HasForeignKey<Empleado>(d => d.usuario_id)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK_Empleado_Usuario");
         });
 
         modelBuilder.Entity<EstadosServicio>(entity =>
@@ -294,11 +288,11 @@ public partial class CarwashContext : DbContext
 
             entity.HasIndex(e => e.role_id, "FK_Usuario_Role");
 
-            entity.HasIndex(e => e.correo, "correo").IsUnique();
+            entity.HasIndex(e => e.correo, "correo2").IsUnique();
 
             entity.HasIndex(e => e.empleado_id, "empleado_id");
 
-            entity.HasIndex(e => e.usuario, "usuario").IsUnique();
+            entity.HasIndex(e => e.usuario1, "usuario").IsUnique();
 
             entity.Property(e => e.id).HasMaxLength(36);
             entity.Property(e => e.contrasena)
@@ -315,7 +309,7 @@ public partial class CarwashContext : DbContext
             entity.Property(e => e.updated_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
-            entity.Property(e => e.usuario)
+            entity.Property(e => e.usuario1)
                 .IsRequired()
                 .HasMaxLength(50)
                 .HasColumnName("usuario");
@@ -360,6 +354,18 @@ public partial class CarwashContext : DbContext
             entity.HasOne(d => d.cliente).WithMany(p => p.Vehiculos)
                 .HasForeignKey(d => d.cliente_id)
                 .HasConstraintName("Vehiculos_ibfk_1");
+        });
+
+        modelBuilder.Entity<__EFMigrationsHistory>(entity =>
+        {
+            entity.HasKey(e => e.MigrationId).HasName("PRIMARY");
+
+            entity.ToTable("__EFMigrationsHistory");
+
+            entity.Property(e => e.MigrationId).HasMaxLength(150);
+            entity.Property(e => e.ProductVersion)
+                .IsRequired()
+                .HasMaxLength(32);
         });
 
         OnModelCreatingPartial(modelBuilder);

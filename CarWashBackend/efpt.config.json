@@ -15,6 +15,10 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "__EFMigrationsHistory",
+         "ObjectType": 0
+      },
+      {
          "Name": "Clientes",
          "ObjectType": 0
       },
