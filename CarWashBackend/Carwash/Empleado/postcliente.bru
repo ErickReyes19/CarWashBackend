@@ -1,0 +1,27 @@
+meta {
+  name: postcliente
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:5048/api/Empleado
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "nombre": "Jose Efrain",
+    "apellido": "Aguirre",
+    "correo": "efrain.reyes@gmail.com",
+    "telefono": "123123",
+    "edad": 20,
+    "genero": "Masculino"
+  }
+  
+}

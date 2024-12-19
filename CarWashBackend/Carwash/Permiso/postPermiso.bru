@@ -1,0 +1,23 @@
+meta {
+  name: postPermiso
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:5048/api/Permiso
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "nombre": "Crear vehiculo",
+    "descripcion": "Permiso para crear un vehiculo"
+  }
+  
+}

@@ -1,0 +1,15 @@
+meta {
+  name: getClientes
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:5048/api/Cliente
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

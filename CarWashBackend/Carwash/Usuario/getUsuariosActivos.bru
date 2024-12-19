@@ -1,0 +1,15 @@
+meta {
+  name: getUsuariosActivos
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://localhost:5048/api/Usuario/active
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

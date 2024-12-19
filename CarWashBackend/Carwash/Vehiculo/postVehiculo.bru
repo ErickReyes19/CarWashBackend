@@ -1,0 +1,27 @@
+meta {
+  name: postVehiculo
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:5048/api/vehiculo
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "cliente_id": "93ac8255-0c6e-49df-972d-1dfc502ed61a",
+    "placa": "abc1234",
+    "modelo": "22R",
+    "marca": "Toyota",
+    "color": "Gris",
+    "activo": true
+  }
+  
+}

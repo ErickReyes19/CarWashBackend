@@ -1,0 +1,27 @@
+meta {
+  name: putPermiso
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:5048/api/Usuario/dfb335bd-8fbe-40e2-bb3a-3330572f2aee
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id": "dfb335bd-8fbe-40e2-bb3a-3330572f2aee",
+    "usuario1": "Efrain",
+    "contrasena": "Efrain1",
+    "empleado_id": "ee71e4b3-5f49-4978-a62b-954d5c83ec39",
+    "role_id": "5ecce2aa-67ac-4e2c-9c28-0ff60a565ba0",
+    "activo": false
+  }
+  
+}

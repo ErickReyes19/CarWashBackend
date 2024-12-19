@@ -1,0 +1,15 @@
+meta {
+  name: getEmpleadoById
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:5048/api/Empleado/e9d1c7a0-8f32-4a89-bb8b-0f7c6a1a2429
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
