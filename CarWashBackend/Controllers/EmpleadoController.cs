@@ -71,7 +71,7 @@ namespace CarWashBackend.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al crear el cliente: {ex.Message}");
+                return StatusCode(500, $"Error al crear el empleado: {ex.Message}");
             }
         }
 

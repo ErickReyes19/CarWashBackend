@@ -295,6 +295,7 @@ public partial class CarwashContext : DbContext
             entity.HasIndex(e => e.usuario1, "usuario").IsUnique();
 
             entity.Property(e => e.id).HasMaxLength(36);
+            entity.Property(e => e.activo).HasDefaultValueSql("'1'");
             entity.Property(e => e.contrasena)
                 .IsRequired()
                 .HasMaxLength(255);
