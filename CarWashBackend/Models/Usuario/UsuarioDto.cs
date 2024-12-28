@@ -8,3 +8,10 @@
     public DateTime? created_at { get; set; }
     public DateTime? updated_at { get; set; }
 }
+
+
+public class UsuarioSummaryDTO
+{
+    public string Id { get; set; }
+    public string Usuario { get; set; }
+}

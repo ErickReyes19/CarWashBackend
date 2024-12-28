@@ -1,0 +1,28 @@
+meta {
+  name: putPago
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:5048/api/pago/0a1342fe-9f23-41a2-8ec0-bb7176972d2a
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id": "0a1342fe-9f23-41a2-8ec0-bb7176972d2a",
+    "registro_servicio_id": "98bca9c7-bff5-4f7c-b090-18c3789842df",
+    "monto": 150.50,
+    "metodo_pago": "Transferencia",
+    "fecha": "2024-12-28T10:00:00",
+    "created_at": "2024-12-28T09:30:00",
+    "updated_at": "2024-12-28T09:30:00"
+  }
+  
+}

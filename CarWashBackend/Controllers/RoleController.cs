@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace CarWashBackend.Controllers
 {
@@ -35,7 +36,11 @@ namespace CarWashBackend.Controllers
                     activo = r.activo,
                     created_at = r.created_at,
                     updated_at = r.updated_at,
-                    permisosIds = r.permisos.Select(p => p.id).ToList()
+                    permisos = r.permisos.Select(p => new PermisoDTORol
+                    {
+                        id = p.id,
+                        nombre = p.nombre
+                    }).ToList()
                 }).ToList();
 
                 return Ok(rolesDTO);
@@ -65,7 +70,11 @@ namespace CarWashBackend.Controllers
                     activo = r.activo,
                     created_at = r.created_at,
                     updated_at = r.updated_at,
-                    permisosIds = r.permisos.Select(p => p.id).ToList()
+                    permisos = r.permisos.Select(p => new PermisoDTORol
+                    {
+                        id = p.id,
+                        nombre = p.nombre
+                    }).ToList()
                 }).ToList();
 
                 return Ok(rolesDTO);
@@ -97,7 +106,11 @@ namespace CarWashBackend.Controllers
                     activo = role.activo,
                     created_at = role.created_at,
                     updated_at = role.updated_at,
-                    permisosIds = role.permisos.Select(p => p.id).ToList()
+                    permisos = role.permisos.Select(p => new PermisoDTORol
+                    {
+                        id = p.id,
+                        nombre = p.nombre
+                    }).ToList()
                 };
 
                 return Ok(roleDTO);
@@ -146,7 +159,11 @@ namespace CarWashBackend.Controllers
                     activo = newRole.activo,
                     created_at = newRole.created_at,
                     updated_at = newRole.updated_at,
-                    permisosIds = newRole.permisos.Select(p => p.id).ToList()
+                    permisos = newRole.permisos.Select(p => new PermisoDTORol
+                    {
+                        id = p.id,
+                        nombre = p.nombre
+                    }).ToList()
                 };
 
                 return CreatedAtAction(nameof(GetRoleById), new { id = newRole.id }, roleDTO);
@@ -178,10 +195,10 @@ namespace CarWashBackend.Controllers
                 existingRole.activo = roleDTO.activo;
                 existingRole.updated_at = DateTime.UtcNow;
 
-                if (roleDTO.permisosIds != null)
+                if (roleDTO.id != null)
                 {
                     var permisos = await _context.Permisos
-                        .Where(p => roleDTO.permisosIds.Contains(p.id))
+                        .Where(p => roleDTO.id.Contains(p.id))
                         .ToListAsync();
 
                     existingRole.permisos = permisos;
@@ -198,7 +215,11 @@ namespace CarWashBackend.Controllers
                     activo = existingRole.activo,
                     created_at = existingRole.created_at,
                     updated_at = existingRole.updated_at,
-                    permisosIds = existingRole.permisos.Select(p => p.id).ToList()
+                    permisos = existingRole.permisos.Select(p => new PermisoDTORol
+                    {
+                        id = p.id,
+                        nombre = p.nombre
+                    }).ToList()
                 };
 
                 return Ok(updatedRoleDTO);

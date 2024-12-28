@@ -25,11 +25,4 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\EstadoServicio\" />
-    <Folder Include="Models\Pago\" />
-    <Folder Include="Models\RegistroServicio\" />
-    <Folder Include="Models\Servicio\" />
-  </ItemGroup>
-
 </Project>

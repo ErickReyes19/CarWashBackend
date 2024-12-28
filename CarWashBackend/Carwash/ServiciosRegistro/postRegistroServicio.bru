@@ -1,0 +1,28 @@
+meta {
+  name: postRegistroServicio
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:5048/api/RegistroServicio
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "cliente_id": "93ac8255-0c6e-49df-972d-1dfc502ed61a",
+    "vehiculo_id": "67defbfd-019e-4646-9aa5-ec11a73eeaf9",
+    "servicio_id": "51e1a9d8-11f5-447e-aaba-6e49a07b6d70",
+    "usuario_id": "a9c0e1d8-8a3f-4b7c-a36f-d5b0e493af96",
+    "estado_id": "5ec7480a-c460-44cb-8154-775e442e34d1",
+    "observaciones": "Cliente solicitó un servicio completo de lavado y detallado.",
+    "fecha": "2024-12-28T14:35:00"
+  }
+  
+}

@@ -1,0 +1,24 @@
+meta {
+  name: postServicio
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:5048/api/Servicio
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "nombre": "Lavado Exterior",
+    "descripcion": "Servicio de lavado exterior del vehículo, incluye lavado con espuma, secado y limpieza de llantas.",
+    "precio": 250.00
+  }
+  
+}

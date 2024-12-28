@@ -17,5 +17,7 @@ public partial class EstadosServicio
 
     public DateTime? updated_at { get; set; }
 
+    public bool? activo { get; set; }
+
     public virtual ICollection<RegistroServicio> RegistroServicios { get; set; } = new List<RegistroServicio>();
 }

@@ -1,0 +1,23 @@
+meta {
+  name: postEstadosServicio
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:5048/api/EstadosServicio
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+      "nombre": "En espera",
+      "descripcion": "El servicio está en espera de asignación."
+  }
+  
+}

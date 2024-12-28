@@ -1,0 +1,15 @@
+meta {
+  name: getServiciosRegistro
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:5048/api/RegistroServicio
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

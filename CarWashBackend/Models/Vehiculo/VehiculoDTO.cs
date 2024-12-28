@@ -12,3 +12,10 @@
     // Nombre del cliente, no la entidad completa
     public string ClienteNombre { get; set; }
 }
+
+public class VehiculoSummaryDTO
+{
+    public string Id { get; set; }
+    public string Marca { get; set; }
+}
+
