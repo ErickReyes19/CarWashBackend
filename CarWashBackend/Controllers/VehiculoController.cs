@@ -50,6 +50,65 @@ public class VehiculoController : ControllerBase
         }
     }
 
+
+    [HttpGet("active")]
+    public async Task<IActionResult> GetActiveVehiculos()
+    {
+        // Obtener los vehículos activos junto con la información del cliente
+        var vehiculosActivos = await _context.Vehiculos
+                                              .Where(v => v.activo == true)
+                                              .Include(v => v.cliente)  // Incluir el cliente
+                                              .ToListAsync();
+
+        // Mapear los vehículos activos a un DTO
+        var vehiculosDTO = vehiculosActivos.Select(v => new VehiculoDTO
+        {
+            id = v.id,
+            placa = v.placa,
+            modelo = v.modelo,
+            marca = v.marca,
+            color = v.color,
+            activo = v.activo,
+            created_at = v.created_at,
+            updated_at = v.updated_at,
+            ClienteNombre = v.cliente?.nombre // Nombre del cliente asociado
+        }).ToList();
+
+        return Ok(vehiculosDTO);  // Retorna la lista de DTOs
+    }
+
+    [HttpGet("cliente/{clienteId}")]
+    public async Task<IActionResult> GetVehiculosByClienteId(string clienteId)
+    {
+        var vehiculos = await _context.Vehiculos
+                                       .Include(v => v.cliente)
+                                       .Where(v => v.cliente.id == clienteId)
+                                       .ToListAsync();
+
+        // Si no se encuentran vehículos, retorna un mensaje indicando que no existen
+        if (vehiculos == null || !vehiculos.Any())
+        {
+            return NotFound(new { message = "No se encontraron vehículos para el cliente con ID " + clienteId });
+        }
+
+        // Crear el DTO para los vehículos encontrados
+        var vehiculosDto = vehiculos.Select(v => new VehiculoDTO
+        {
+            id = v.id,
+            placa = v.placa,
+            modelo = v.modelo,
+            marca = v.marca,
+            color = v.color,
+            activo = v.activo,
+            created_at = v.created_at,
+            updated_at = v.updated_at,
+            ClienteNombre = v.cliente?.nombre
+        }).ToList();
+
+        // Retornar la lista de vehículos en formato DTO
+        return Ok(vehiculosDto);
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateVehiculo(Vehiculo vehiculo)
     {

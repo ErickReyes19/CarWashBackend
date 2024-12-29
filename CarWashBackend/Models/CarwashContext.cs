@@ -101,6 +101,7 @@ public partial class CarwashContext : DbContext
             entity.HasKey(e => e.id).HasName("PRIMARY");
 
             entity.Property(e => e.id).HasMaxLength(36);
+            entity.Property(e => e.activo).HasDefaultValueSql("'1'");
             entity.Property(e => e.created_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");

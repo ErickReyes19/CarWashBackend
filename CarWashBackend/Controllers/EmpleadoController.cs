@@ -38,6 +38,8 @@ namespace CarWashBackend.Controllers
                     Edad = e.edad,
                     Genero = e.genero,
                     Activo = e.activo,
+                    correo = e.correo,
+                    
                     CreatedAt = e.created_at,
                     UpdatedAt = e.updated_at,
                     // Accedemos directamente al primer (y único) usuario
@@ -53,7 +55,7 @@ namespace CarWashBackend.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCliente(Empleado empleado)
+        public async Task<IActionResult> CreateEmpleado(Empleado empleado)
         {
             try
             {
@@ -97,6 +99,7 @@ namespace CarWashBackend.Controllers
                     Edad = e.edad,
                     Genero = e.genero,
                     Activo = e.activo,
+                    correo = e.correo,
                     CreatedAt = e.created_at,
                     UpdatedAt = e.updated_at,
                     UsuarioNombre = e.Usuarios.FirstOrDefault()?.usuario1 // Maneja posibles valores null
@@ -133,6 +136,7 @@ namespace CarWashBackend.Controllers
                     Edad = empleado.edad,
                     Genero = empleado.genero,
                     Activo = empleado.activo,
+                    correo = empleado.correo,
                     CreatedAt = empleado.created_at,
                     UpdatedAt = empleado.updated_at,
                     UsuarioNombre = empleado.Usuarios.FirstOrDefault()?.usuario1 // Maneja posibles valores null

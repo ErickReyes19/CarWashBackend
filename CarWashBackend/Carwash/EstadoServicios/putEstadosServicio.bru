@@ -1,0 +1,25 @@
+meta {
+  name: putEstadosServicio
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:5048/api/EstadosServicio/5ec7480a-c460-44cb-8154-775e442e34d1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id": "5ec7480a-c460-44cb-8154-775e442e34d1",
+      "nombre": "En proceso",
+      "descripcion": "El servicio está en proceso de asignación.",
+    "activo": false
+  }
+  
+}
