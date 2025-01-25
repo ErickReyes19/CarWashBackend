@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using CarWashBackend.Models;
 using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -70,58 +71,63 @@ public class UsuarioController : ControllerBase
         }
     }
 
-    // Crear un nuevo usuario
-    [HttpPost]
-    public async Task<IActionResult> CreateUsuario(Usuario usuario)
+
+
+[HttpPost]
+public async Task<IActionResult> CreateUsuario(Usuario usuario)
+{
+    if (usuario == null)
+        return BadRequest("Datos inválidos.");
+
+    // Verificar si el nombre de usuario ya está registrado
+    var existingUsuario = await _context.Usuarios
+                                         .FirstOrDefaultAsync(u => u.usuario1 == usuario.usuario1);
+
+    if (existingUsuario != null)
     {
-        if (usuario == null)
-            return BadRequest("Datos inválidos.");
-
-        // Verificar si el nombre de usuario ya está registrado
-        var existingUsuario = await _context.Usuarios
-                                             .FirstOrDefaultAsync(u => u.usuario1 == usuario.usuario1);
-
-        if (existingUsuario != null)
-        {
-            return Conflict(new { message = "El nombre de usuario ya está registrado." });
-        }
-
-        // Verificar si el empleado y el rol existen
-        var empleadoExistente = await _context.Empleados
-                                              .FirstOrDefaultAsync(e => e.id == usuario.empleado_id);
-        var roleExistente = await _context.Roles
-                                          .FirstOrDefaultAsync(r => r.id == usuario.role_id);
-
-        if (empleadoExistente == null || roleExistente == null)
-        {
-            return NotFound(new { message = "Empleado o rol no encontrados." });
-        }
-
-        // Crear el usuario
-        usuario.id = Guid.NewGuid().ToString();
-        usuario.created_at = DateTime.UtcNow;
-        usuario.updated_at = DateTime.UtcNow;
-
-        _context.Usuarios.Add(usuario);
-        await _context.SaveChangesAsync();
-
-        // Retornar el usuario creado
-        var usuarioCreatedDto = new UsuarioDTO
-        {
-            id = usuario.id,
-            usuario = usuario.usuario1,
-            activo = usuario.activo,
-            empleadoNombre = empleadoExistente?.nombre,
-            roleNombre = roleExistente?.nombre,
-            created_at = usuario.created_at,
-            updated_at = usuario.updated_at
-        };
-
-        return CreatedAtAction(nameof(GetUsuarioById), new { id = usuario.id }, usuarioCreatedDto);
+        return Conflict(new { message = "El nombre de usuario ya está registrado." });
     }
 
-    // Obtener un usuario por ID
-    [HttpGet("{id}")]
+    // Verificar si el empleado y el rol existen
+    var empleadoExistente = await _context.Empleados
+                                          .FirstOrDefaultAsync(e => e.id == usuario.empleado_id);
+    var roleExistente = await _context.Roles
+                                      .FirstOrDefaultAsync(r => r.id == usuario.role_id);
+
+    if (empleadoExistente == null || roleExistente == null)
+    {
+        return NotFound(new { message = "Empleado o rol no encontrados." });
+    }
+
+    // Encriptar la contraseña antes de guardarla
+    usuario.contrasena = BCrypt.Net.BCrypt.HashPassword(usuario.contrasena);
+
+    // Crear el usuario
+    usuario.id = Guid.NewGuid().ToString();
+    usuario.created_at = DateTime.UtcNow;
+    usuario.updated_at = DateTime.UtcNow;
+
+    _context.Usuarios.Add(usuario);
+    await _context.SaveChangesAsync();
+
+    // Retornar el usuario creado
+    var usuarioCreatedDto = new UsuarioDTO
+    {
+        id = usuario.id,
+        usuario = usuario.usuario1,
+        activo = usuario.activo,
+        empleadoNombre = empleadoExistente?.nombre,
+        roleNombre = roleExistente?.nombre,
+        created_at = usuario.created_at,
+        updated_at = usuario.updated_at
+    };
+
+    return CreatedAtAction(nameof(GetUsuarioById), new { id = usuario.id }, usuarioCreatedDto);
+}
+
+
+// Obtener un usuario por ID
+[HttpGet("{id}")]
     public async Task<IActionResult> GetUsuarioById(string id)
     {
         var usuario = await _context.Usuarios
@@ -133,12 +139,12 @@ public class UsuarioController : ControllerBase
             return NotFound();
 
         // Crear el DTO con los datos del usuario
-        var usuarioDto = new UsuarioDTO
+        var usuarioDto = new UsuarioCreateDTO
         {
             id = usuario.id,
             usuario = usuario.usuario1,
-            empleadoNombre = usuario.empleado?.nombre,
-            roleNombre = usuario.role?.nombre,
+            empleado_id = usuario.empleado?.id,
+            role_id = usuario.role?.id,
             activo = usuario.activo,
             created_at = usuario.created_at,
             updated_at = usuario.updated_at
@@ -178,6 +184,12 @@ public class UsuarioController : ControllerBase
             return NotFound(new { message = "Empleado o rol no encontrados." });
         }
 
+        // Si la contraseña fue enviada y es nueva, encriptarla antes de guardar
+        if (!string.IsNullOrEmpty(usuario.contrasena))
+        {
+            usuario.contrasena = BCrypt.Net.BCrypt.HashPassword(usuario.contrasena);
+        }
+
         // Actualizar los datos del usuario
         existingUsuario.usuario1 = usuario.usuario1;
         existingUsuario.contrasena = usuario.contrasena;
@@ -204,6 +216,7 @@ public class UsuarioController : ControllerBase
 
         return Ok(usuarioUpdatedDto);
     }
+
 
 
 }

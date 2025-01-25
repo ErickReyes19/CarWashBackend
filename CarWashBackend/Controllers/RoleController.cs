@@ -36,7 +36,7 @@ namespace CarWashBackend.Controllers
                     activo = r.activo,
                     created_at = r.created_at,
                     updated_at = r.updated_at,
-                    permisos = r.permisos.Select(p => new PermisoDTORol
+                    permisosRol = r.permisos.Select(p => new PermisoDTORol
                     {
                         id = p.id,
                         nombre = p.nombre
@@ -70,7 +70,7 @@ namespace CarWashBackend.Controllers
                     activo = r.activo,
                     created_at = r.created_at,
                     updated_at = r.updated_at,
-                    permisos = r.permisos.Select(p => new PermisoDTORol
+                    permisosRol = r.permisos.Select(p => new PermisoDTORol
                     {
                         id = p.id,
                         nombre = p.nombre
@@ -106,7 +106,7 @@ namespace CarWashBackend.Controllers
                     activo = role.activo,
                     created_at = role.created_at,
                     updated_at = role.updated_at,
-                    permisos = role.permisos.Select(p => new PermisoDTORol
+                    permisosRol = role.permisos.Select(p => new PermisoDTORol
                     {
                         id = p.id,
                         nombre = p.nombre
@@ -139,10 +139,10 @@ namespace CarWashBackend.Controllers
                     updated_at = DateTime.UtcNow
                 };
 
-                if (roleCreateDTO.permisosIds != null && roleCreateDTO.permisosIds.Any())
+                if (roleCreateDTO.permisosRol != null && roleCreateDTO.permisosRol.Any())
                 {
                     var permisos = await _context.Permisos
-                        .Where(p => roleCreateDTO.permisosIds.Contains(p.id))
+                        .Where(p => roleCreateDTO.permisosRol.Contains(p.id))
                         .ToListAsync();
 
                     newRole.permisos = permisos;
@@ -159,7 +159,7 @@ namespace CarWashBackend.Controllers
                     activo = newRole.activo,
                     created_at = newRole.created_at,
                     updated_at = newRole.updated_at,
-                    permisos = newRole.permisos.Select(p => new PermisoDTORol
+                    permisosRol = newRole.permisos.Select(p => new PermisoDTORol
                     {
                         id = p.id,
                         nombre = p.nombre
@@ -176,7 +176,7 @@ namespace CarWashBackend.Controllers
 
         // PUT: api/Role/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateRole(string id, [FromBody] RoleDTO roleDTO)
+        public async Task<IActionResult> UpdateRole(string id, [FromBody] RoleUpdateDTO roleDTO)
         {
             if (id != roleDTO.id)
                 return BadRequest("El ID proporcionado no coincide.");
@@ -184,29 +184,35 @@ namespace CarWashBackend.Controllers
             try
             {
                 var existingRole = await _context.Roles
-                    .Include(r => r.permisos)
+                    .Include(r => r.permisos) // Incluimos los permisos del rol actual
                     .FirstOrDefaultAsync(r => r.id == id);
 
                 if (existingRole == null)
                     return NotFound($"Rol con ID {id} no encontrado.");
 
+                // Actualizar la información básica del rol
                 existingRole.nombre = roleDTO.nombre;
                 existingRole.descripcion = roleDTO.descripcion;
                 existingRole.activo = roleDTO.activo;
                 existingRole.updated_at = DateTime.UtcNow;
 
-                if (roleDTO.id != null)
+                // Si los permisos fueron enviados
+                if (roleDTO.permisosRol != null && roleDTO.permisosRol.Any())
                 {
+                    // Encontrar los permisos usando los IDs proporcionados
                     var permisos = await _context.Permisos
-                        .Where(p => roleDTO.id.Contains(p.id))
+                        .Where(p => roleDTO.permisosRol.Contains(p.id)) // Filtrar por los IDs proporcionados
                         .ToListAsync();
 
+                    // Asignamos los permisos encontrados al rol
                     existingRole.permisos = permisos;
                 }
 
+                // Actualizar el rol en la base de datos
                 _context.Roles.Update(existingRole);
                 await _context.SaveChangesAsync();
 
+                // Devolver el DTO actualizado con los objetos de permisos (no solo los IDs)
                 var updatedRoleDTO = new RoleDTO
                 {
                     id = existingRole.id,
@@ -215,11 +221,11 @@ namespace CarWashBackend.Controllers
                     activo = existingRole.activo,
                     created_at = existingRole.created_at,
                     updated_at = existingRole.updated_at,
-                    permisos = existingRole.permisos.Select(p => new PermisoDTORol
+                    permisosRol = existingRole.permisos.Select(p => new PermisoDTORol
                     {
                         id = p.id,
                         nombre = p.nombre
-                    }).ToList()
+                    }).ToList() // Convertimos cada permiso a PermisoDTORol
                 };
 
                 return Ok(updatedRoleDTO);
@@ -229,5 +235,7 @@ namespace CarWashBackend.Controllers
                 return StatusCode(500, $"Error al actualizar el rol: {ex.Message}");
             }
         }
+
+
     }
 }

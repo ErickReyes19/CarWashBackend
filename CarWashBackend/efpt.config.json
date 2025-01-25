@@ -19,6 +19,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "cliente_vehiculo",
+         "ObjectType": 0
+      },
+      {
          "Name": "Clientes",
          "ObjectType": 0
       },

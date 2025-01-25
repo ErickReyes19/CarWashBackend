@@ -185,5 +185,41 @@ namespace CarWashBackend.Controllers
                 return StatusCode(500, $"Error al actualizar el empleado: {ex.Message}");
             }
         }
+
+        [HttpGet("disponibles")]
+        public async Task<IActionResult> GetEmpleadosSinUsuario()
+        {
+            try
+            {
+                var empleadosSinUsuario = await _context.Empleados
+                    .Where(e => e.activo == true && !_context.Usuarios.Any(u => u.empleado_id == e.id))
+                    .ToListAsync();
+
+                if (empleadosSinUsuario == null || !empleadosSinUsuario.Any())
+                    return NotFound("No se encontraron empleados sin usuario asignado.");
+
+                // Mapeamos los empleados a DTOs
+                var empleadosDTO = empleadosSinUsuario.Select(e => new EmpleadoDTO
+                {
+                    Id = e.id,
+                    Nombre = e.nombre,
+                    Apellido = e.apellido,
+                    Edad = e.edad,
+                    Genero = e.genero,
+                    Activo = e.activo,
+                    correo = e.correo,
+                    CreatedAt = e.created_at,
+                    UpdatedAt = e.updated_at
+                }).ToList();
+
+                return Ok(empleadosDTO);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener los empleados sin usuario asignado: {ex.Message}");
+            }
+        }
     }
+
+
 }

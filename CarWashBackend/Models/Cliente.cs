@@ -25,5 +25,5 @@ public partial class Cliente
 
     public virtual ICollection<RegistroServicio> RegistroServicios { get; set; } = new List<RegistroServicio>();
 
-    public virtual ICollection<Vehiculo> Vehiculos { get; set; } = new List<Vehiculo>();
+    public virtual ICollection<Vehiculo> vehiculos { get; set; } = new List<Vehiculo>();
 }

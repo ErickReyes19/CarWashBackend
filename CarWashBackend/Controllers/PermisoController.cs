@@ -54,14 +54,10 @@ namespace CarWashBackend.Controllers
                     .Where(p => p.activo == true)
                     .ToListAsync();
 
-                var permisosDTO = permisosActivos.Select(p => new PermisoDTO
+                var permisosDTO = permisosActivos.Select(p => new PermisoDTORol
                 {
                     id = p.id,
-                    nombre = p.nombre,
-                    activo = p.activo,
-                    descripcion = p.descripcion,
-                    created_at = p.created_at,
-                    updated_at = p.updated_at
+                    nombre = p.nombre
                 }).ToList();
 
                 return Ok(permisosDTO);

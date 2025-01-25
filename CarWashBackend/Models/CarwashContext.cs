@@ -70,6 +70,26 @@ public partial class CarwashContext : DbContext
             entity.Property(e => e.updated_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
+
+            entity.HasMany(d => d.vehiculos).WithMany(p => p.clientes)
+                .UsingEntity<Dictionary<string, object>>(
+                    "cliente_vehiculo",
+                    r => r.HasOne<Vehiculo>().WithMany()
+                        .HasForeignKey("vehiculo_id")
+                        .HasConstraintName("fk_vehiculo"),
+                    l => l.HasOne<Cliente>().WithMany()
+                        .HasForeignKey("cliente_id")
+                        .HasConstraintName("fk_cliente"),
+                    j =>
+                    {
+                        j.HasKey("cliente_id", "vehiculo_id")
+                            .HasName("PRIMARY")
+                            .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
+                        j.ToTable("cliente_vehiculo");
+                        j.HasIndex(new[] { "vehiculo_id" }, "fk_vehiculo");
+                        j.IndexerProperty<string>("cliente_id").HasMaxLength(36);
+                        j.IndexerProperty<string>("vehiculo_id").HasMaxLength(36);
+                    });
         });
 
         modelBuilder.Entity<Empleado>(entity =>
@@ -349,10 +369,6 @@ public partial class CarwashContext : DbContext
             entity.Property(e => e.updated_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
-
-            entity.HasOne(d => d.cliente).WithMany(p => p.Vehiculos)
-                .HasForeignKey(d => d.cliente_id)
-                .HasConstraintName("Vehiculos_ibfk_1");
         });
 
         modelBuilder.Entity<__EFMigrationsHistory>(entity =>

@@ -1,0 +1,15 @@
+meta {
+  name: putAsignarvehiculo
+  type: http
+  seq: 7
+}
+
+put {
+  url: http://localhost:5048/api/Vehiculo/89cacd99-67d2-405e-9a67-9980c032192a/agregar-cliente/ad5577ce-61c0-49ce-832e-605117bb19dc
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
