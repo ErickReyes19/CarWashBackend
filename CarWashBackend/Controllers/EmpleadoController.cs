@@ -39,7 +39,7 @@ namespace CarWashBackend.Controllers
                     Genero = e.genero,
                     Activo = e.activo,
                     correo = e.correo,
-                    
+
                     CreatedAt = e.created_at,
                     UpdatedAt = e.updated_at,
                     // Accedemos directamente al primer (y único) usuario

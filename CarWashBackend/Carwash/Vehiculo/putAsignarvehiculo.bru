@@ -5,11 +5,20 @@ meta {
 }
 
 put {
-  url: http://localhost:5048/api/Vehiculo/89cacd99-67d2-405e-9a67-9980c032192a/agregar-cliente/ad5577ce-61c0-49ce-832e-605117bb19dc
+  url: http://localhost:5048/api/Vehiculo/030f147c-e2c4-48e1-8ba8-80a3c99c553a/asignar-clientes
   body: json
   auth: bearer
 }
 
 auth:bearer {
   token: {{token}}
+}
+
+body:json {
+  [
+      "068c013c-abe4-4023-b6eb-4880c739bdd0",
+      "75427957-abde-417e-abc0-c706102c9ba4"
+    ]
+  
+  
 }

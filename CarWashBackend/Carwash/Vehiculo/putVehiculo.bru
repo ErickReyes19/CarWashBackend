@@ -5,7 +5,7 @@ meta {
 }
 
 put {
-  url: http://localhost:5048/api/Vehiculo/89cacd99-67d2-405e-9a67-9980c032192a
+  url: http://localhost:5048/api/Vehiculo/a2b64c94-7a3d-42f2-bede-d829aaf31a13
   body: json
   auth: bearer
 }
@@ -16,13 +16,15 @@ auth:bearer {
 
 body:json {
   {
-    "id": "89cacd99-67d2-405e-9a67-9980c032192a",
-    "placa": "ABC123",
+    "id":"a2b64c94-7a3d-42f2-bede-d829aaf31a13",
+    "placa": "VBN12s34",
     "modelo": "Modelo X",
     "marca": "Marca Y",
     "color": "Rojo",
     "activo": true,
-    "cliente_id": "ec483e8d-2abb-44d6-9c88-800c18e88660"
+    "clientes": [
+      { "id": "068c013c-abe4-4023-b6eb-4880c739bdd0" }
+    ]
   }
   
 }

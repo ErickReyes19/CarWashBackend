@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using CarWashBackend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using CarWashBackend.Models;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Packaging;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -19,39 +20,39 @@ public class VehiculoController : ControllerBase
     {
         try
         {
-            // Obtiene todos los vehículos, incluyendo los clientes asociados a través de la relación muchos a muchos
-            var vehiculos = await _context.Vehiculos
-                .Include(v => v.clientes) // Incluye los clientes asociados a cada vehículo
+            var vehiculosDto = await _context.Vehiculos
+                .AsNoTracking()
+                .Include(v => v.clientes)
+                .Select(v => new VehiculoClienteDTO
+                {
+                    id = v.id,
+                    placa = v.placa,
+                    modelo = v.modelo,
+                    marca = v.marca,
+                    color = v.color,
+                    activo = v.activo,
+                    created_at = v.created_at,
+                    updated_at = v.updated_at,
+                    Clientes = v.clientes.Select(c => new ClienteSummaryDTO
+                    {
+                        Id = c.id,
+                        Nombre = c.nombre
+                    }).ToList()
+                })
                 .ToListAsync();
 
-            if (vehiculos == null || vehiculos.Count == 0)
+            if (vehiculosDto.Count == 0)
                 return NotFound(new { message = "No se encontraron vehículos" });
-
-            // Mapeamos los vehículos a un DTO para evitar el ciclo de referencia
-            var vehiculosDto = vehiculos.Select(v => new VehiculoClienteDTO
-            {
-                id = v.id,
-                placa = v.placa,
-                modelo = v.modelo,
-                marca = v.marca,
-                color = v.color,
-                activo = v.activo,
-                created_at = v.created_at,
-                updated_at = v.updated_at,
-                // Para cada cliente asociado, incluimos su nombre y ID
-                Clientes = v.clientes.Select(c => new ClienteSummaryDTO
-                {
-                    Id = c.id,
-                    Nombre = c.nombre
-                }).ToList()
-            }).ToList();
 
             return Ok(vehiculosDto);
         }
         catch (Exception ex)
         {
-            // Manejo de excepción
-            return StatusCode(500, new { message = "Error en el servidor", details = ex.Message });
+            return StatusCode(500, new
+            {
+                message = "Error interno en el servidor",
+                error = ex.Message
+            });
         }
     }
 
@@ -62,42 +63,44 @@ public class VehiculoController : ControllerBase
     {
         try
         {
-            // Obtener los vehículos activos junto con la información de los clientes asociados
-            var vehiculosActivos = await _context.Vehiculos
-                                                 .Where(v => v.activo == true)  // Filtra solo los vehículos activos
-                                                 .Include(v => v.clientes)  // Incluye los clientes asociados a cada vehículo
-                                                 .ToListAsync();
+            var vehiculosDTO = await _context.Vehiculos
+                .AsNoTracking()
+                .Where(v => v.activo.HasValue && v.activo.Value)  // Verifica si 'activo' no es null y es true
+                .Include(v => v.clientes)  // Incluye los clientes asociados a cada vehículo
+                .Select(v => new VehiculoClienteDTO
+                {
+                    id = v.id,
+                    placa = v.placa,
+                    modelo = v.modelo,
+                    marca = v.marca,
+                    color = v.color,
+                    activo = v.activo,
+                    created_at = v.created_at,
+                    updated_at = v.updated_at,
+                    Clientes = v.clientes.Select(c => new ClienteSummaryDTO
+                    {
+                        Id = c.id,
+                        Nombre = c.nombre
+                    }).ToList()
+                })
+                .ToListAsync();
 
-            if (vehiculosActivos == null || vehiculosActivos.Count == 0)
+            if (vehiculosDTO.Count == 0)
                 return NotFound(new { message = "No se encontraron vehículos activos" });
 
-            // Mapear los vehículos activos a un DTO para evitar el ciclo de referencia
-            var vehiculosDTO = vehiculosActivos.Select(v => new VehiculoClienteDTO
-            {
-                id = v.id,
-                placa = v.placa,
-                modelo = v.modelo,
-                marca = v.marca,
-                color = v.color,
-                activo = v.activo,
-                created_at = v.created_at,
-                updated_at = v.updated_at,
-                // Lista de clientes asociados, cada uno mapeado a un ClienteDTO
-                Clientes = v.clientes.Select(c => new ClienteSummaryDTO
-                {
-                    Id = c.id,
-                    Nombre = c.nombre
-                }).ToList()
-            }).ToList();
-
-            return Ok(vehiculosDTO);  // Retorna la lista de DTOs con los vehículos y los clientes asociados
+            return Ok(vehiculosDTO);
         }
         catch (Exception ex)
         {
-            // Manejo de excepciones
-            return StatusCode(500, new { message = "Error en el servidor", details = ex.Message });
+            // Manejo de excepciones con más detalle
+            return StatusCode(500, new
+            {
+                message = "Error interno en el servidor",
+                error = ex.Message
+            });
         }
     }
+
 
 
     [HttpGet("cliente/{clienteId}")]
@@ -107,9 +110,10 @@ public class VehiculoController : ControllerBase
         {
             // Obtener el cliente con sus vehículos asociados usando la relación muchos a muchos
             var cliente = await _context.Clientes
-                                        .Where(c => c.id == clienteId) // Filtrar por el clienteId
-                                        .Include(c => c.vehiculos) // Incluir los vehículos asociados a este cliente
-                                        .FirstOrDefaultAsync();
+                .AsNoTracking()  // Evita el seguimiento de los cambios para mejorar el rendimiento
+                .Where(c => c.id == clienteId)  // Filtra por el clienteId
+                .Include(c => c.vehiculos)  // Incluye los vehículos asociados a este cliente
+                .FirstOrDefaultAsync();
 
             // Si no se encuentra el cliente o no tiene vehículos, retorna un mensaje indicando que no existen
             if (cliente == null || !cliente.vehiculos.Any())
@@ -146,7 +150,6 @@ public class VehiculoController : ControllerBase
         }
     }
 
-
     [HttpPost]
     public async Task<IActionResult> CreateVehiculo(Vehiculo vehiculo)
     {
@@ -162,42 +165,55 @@ public class VehiculoController : ControllerBase
 
             if (existingVehiculo != null)
             {
-                // Si el vehículo ya está asignado a un cliente, se devuelve la información del cliente
-                if (existingVehiculo.clientes.Any())
+                // Si el vehículo ya está asignado a algún cliente
+                if (existingVehiculo.clientes != null && existingVehiculo.clientes.Any())
                 {
-                    var clienteAsignado = existingVehiculo.clientes.FirstOrDefault();
+                    var clientesAsignados = existingVehiculo.clientes.Select(c => new
+                    {
+                        clienteId = c.id,
+                        clienteNombre = c.nombre
+                    }).ToList();
+
                     return Conflict(new
                     {
-                        message = "El vehículo ya está asignado a un cliente.",
-                        clienteId = clienteAsignado.id,
-                        clienteNombre = clienteAsignado.nombre
+                        message = "El vehículo ya está asignado a uno o más clientes.",
+                        idVehiculo = existingVehiculo.id,
+                        clientes = clientesAsignados
                     });
                 }
 
-                return Conflict(new { message = "Ya existe un vehículo con la misma placa." });
+                // Si el vehículo existe pero no está asignado a ningún cliente
+                return Conflict(new { message = "Ya existe un vehículo con la misma placa, pero no está asignado a un cliente." });
             }
 
-            // Verifica si el cliente existe
-            var clienteExistente = await _context.Clientes
-                                                 .FirstOrDefaultAsync(c => c.id == vehiculo.cliente_id);
-
-            if (clienteExistente == null)
+            // Verificar que los clientes asociados existen
+            var clientesExistentes = new List<Cliente>();
+            foreach (var cliente in vehiculo.clientes)
             {
-                return NotFound(new { message = "El cliente asociado no existe." });
+                var clienteExistente = await _context.Clientes
+                                                      .FirstOrDefaultAsync(c => c.id == cliente.id);
+                if (clienteExistente != null)
+                {
+                    clientesExistentes.Add(clienteExistente);
+                }
+                else
+                {
+                    return NotFound(new { message = $"El cliente con ID {cliente.id} no existe." });
+                }
             }
 
-            // Si el cliente existe, creamos el nuevo vehículo
+            // Si todos los clientes son válidos, asociamos los clientes al vehículo
+            vehiculo.clientes = clientesExistentes;
+
+            // Asignamos los valores para el nuevo vehículo
             vehiculo.id = Guid.NewGuid().ToString();
             vehiculo.created_at = DateTime.UtcNow;
             vehiculo.updated_at = DateTime.UtcNow;
 
-            // Asocia al cliente con el vehículo
-            vehiculo.clientes.Add(clienteExistente);
-
             _context.Vehiculos.Add(vehiculo);
             await _context.SaveChangesAsync();
 
-            // Retorna el nuevo vehículo creado en el DTO
+            // Retorna el nuevo vehículo creado
             var vehiculoCreatedDto = new VehiculoDTO
             {
                 id = vehiculo.id,
@@ -205,55 +221,77 @@ public class VehiculoController : ControllerBase
                 modelo = vehiculo.modelo,
                 marca = vehiculo.marca,
                 color = vehiculo.color,
-                activo = vehiculo.activo,
-                created_at = vehiculo.created_at,
-                updated_at = vehiculo.updated_at,
-                ClienteNombre = vehiculo.clientes?.FirstOrDefault()?.nombre
+                activo = vehiculo.activo ?? false,
+                clientes = vehiculo.clientes.Select(c => new ClienteSummaryDTO
+                {
+                    Id = c.id,
+                    Nombre = c.nombre
+                }).ToList()
             };
 
             return CreatedAtAction(nameof(GetVehiculoById), new { id = vehiculo.id }, vehiculoCreatedDto);
         }
         catch (Exception ex)
         {
-            // Manejo de excepción
             return StatusCode(500, new { message = "Error en el servidor", details = ex.Message });
         }
     }
 
 
 
-    [HttpPut("{vehiculoId}/agregar-cliente/{clienteId}")]
-    public async Task<IActionResult> AddClienteToVehiculo(string vehiculoId, string clienteId)
+
+    [HttpPut("{vehiculoId}/agregar-clientes")]
+    public async Task<IActionResult> AddClientesToVehiculo(string vehiculoId, [FromBody] List<string> clienteIds)
     {
         try
         {
-            // Buscar el vehículo y el cliente
-            var vehiculo = await _context.Vehiculos.Include(v => v.clientes).FirstOrDefaultAsync(v => v.id == vehiculoId);
-            var cliente = await _context.Clientes.FindAsync(clienteId);
-
-            // Verificar si el vehículo y el cliente existen
-            if (vehiculo == null)
-                return NotFound(new { message = "Vehículo no encontrado" });
-
-            if (cliente == null)
-                return NotFound(new { message = "Cliente no encontrado" });
-
-            // Verificar si el cliente ya está asociado al vehículo
-            if (vehiculo.clientes.Any(c => c.id == clienteId))
+            // Verificar que la lista de IDs no esté vacía
+            if (clienteIds == null || !clienteIds.Any())
             {
-                return Conflict(new { message = "Este cliente ya está asociado con el vehículo." });
+                return BadRequest(new { message = "Debe proporcionar al menos un ID de cliente." });
             }
 
-            // Agregar la relación (cliente al vehículo)
-            vehiculo.clientes.Add(cliente);
+            // Buscar el vehículo e incluir los clientes asociados
+            var vehiculo = await _context.Vehiculos
+                                          .Include(v => v.clientes)
+                                          .FirstOrDefaultAsync(v => v.id == vehiculoId);
+
+            if (vehiculo == null)
+            {
+                return NotFound(new { message = "Vehículo no encontrado" });
+            }
+
+            // Buscar todos los clientes por los IDs proporcionados
+            var clientes = await _context.Clientes
+                                         .Where(c => clienteIds.Contains(c.id))
+                                         .ToListAsync();
+
+            // Verificar si todos los clientes existen
+            var clientesNoExistentes = clienteIds.Except(clientes.Select(c => c.id)).ToList();
+            if (clientesNoExistentes.Any())
+            {
+                return NotFound(new { message = "Algunos clientes no existen.", clientesInexistentes = clientesNoExistentes });
+            }
+
+            // Filtrar los clientes que no están ya asociados al vehículo
+            var clientesExistentes = clientes.Where(c => !vehiculo.clientes.Any(vc => vc.id == c.id)).ToList();
+
+            // Agregar los clientes al vehículo
+            vehiculo.clientes.AddRange(clientesExistentes);
 
             // Guardar los cambios en la base de datos
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Cliente agregado al vehículo correctamente" });
+            // Retornar una respuesta exitosa con los clientes agregados
+            return Ok(new
+            {
+                message = "Clientes agregados al vehículo correctamente",
+                clientesAgregados = clientesExistentes.Select(c => new { c.id, c.nombre })
+            });
         }
         catch (Exception ex)
         {
+            // Manejo de excepciones
             return StatusCode(500, new { message = "Error en el servidor", details = ex.Message });
         }
     }
@@ -270,13 +308,14 @@ public class VehiculoController : ControllerBase
                                          .Include(v => v.clientes) // Incluir los clientes relacionados
                                          .FirstOrDefaultAsync(v => v.id == id);
 
+            // Verificar si el vehículo existe
             if (vehiculo == null)
+            {
                 return NotFound(new { message = "Vehículo no encontrado." });
+            }
 
-            // Si el vehículo tiene clientes asociados, tomamos el nombre del primero (o el más relevante)
-            var clienteNombre = vehiculo.clientes?.FirstOrDefault()?.nombre;
-
-            var vehiculoDto = new VehiculoDTO
+            // Crear el DTO para el vehículo con sus clientes asociados
+            var vehiculoDto = new VehiculoClienteDTO
             {
                 id = vehiculo.id,
                 placa = vehiculo.placa,
@@ -286,14 +325,20 @@ public class VehiculoController : ControllerBase
                 activo = vehiculo.activo,
                 created_at = vehiculo.created_at,
                 updated_at = vehiculo.updated_at,
-                ClienteNombre = clienteNombre // Nombre del primer cliente asociado
+                // Si el vehículo tiene clientes asociados, se los mapea, si no, será una lista vacía
+                Clientes = vehiculo.clientes.Select(c => new ClienteSummaryDTO
+                {
+                    Id = c.id,
+                    Nombre = c.nombre
+                }).ToList()
             };
 
+            // Retornar la información del vehículo con los clientes
             return Ok(vehiculoDto);
         }
         catch (Exception ex)
         {
-            // Manejo de excepción
+            // Manejo de excepción en caso de error en el servidor
             return StatusCode(500, new { message = "Error en el servidor", details = ex.Message });
         }
     }
@@ -304,7 +349,7 @@ public class VehiculoController : ControllerBase
         try
         {
             if (vehiculo == null || id != vehiculo.id)
-                return BadRequest("Datos inválidos.");
+                return BadRequest(new { message = "Datos inválidos." });
 
             // Verifica si el vehículo existe
             var existingVehiculo = await _context.Vehiculos
@@ -316,44 +361,44 @@ public class VehiculoController : ControllerBase
                 return NotFound(new { message = "Vehículo no encontrado." });
             }
 
-            // Si el vehículo ya tiene un cliente asignado, devolvemos la información del cliente asignado
-            if (existingVehiculo.clientes.Any())
-            {
-                var clienteAsignado = existingVehiculo.clientes.FirstOrDefault();
-                return Conflict(new
-                {
-                    message = "El vehículo ya está asignado a un cliente.",
-                    clienteId = clienteAsignado.id,
-                    clienteNombre = clienteAsignado.nombre
-                });
-            }
-
-            // Si el vehículo no tiene cliente asignado, actualizamos el vehículo
+            // Actualiza la información del vehículo
             existingVehiculo.placa = vehiculo.placa;
             existingVehiculo.modelo = vehiculo.modelo;
             existingVehiculo.marca = vehiculo.marca;
             existingVehiculo.color = vehiculo.color;
-            existingVehiculo.activo = vehiculo.activo;
+            existingVehiculo.activo = vehiculo.activo ?? false;
             existingVehiculo.updated_at = DateTime.UtcNow;
 
-            // Si se proporciona un cliente_id, asociamos al vehículo con ese cliente
-            if (!string.IsNullOrEmpty(vehiculo.cliente_id))
+            // Si se proporciona un conjunto de clientes, validamos y actualizamos
+            if (vehiculo.clientes != null && vehiculo.clientes.Any())
             {
-                var clienteExistente = await _context.Clientes
-                                                     .FirstOrDefaultAsync(c => c.id == vehiculo.cliente_id);
+                // Obtener todos los IDs de los clientes del body
+                var clienteIds = vehiculo.clientes.Select(c => c.id).ToList();
 
-                if (clienteExistente == null)
+                // Verificar si los clientes existen en la base de datos
+                var clientesExistentes = await _context.Clientes
+                                                        .Where(c => clienteIds.Contains(c.id))
+                                                        .ToListAsync();
+
+                // Verificar si hay algún cliente que no existe
+                var clientesNoExistentes = clienteIds.Except(clientesExistentes.Select(c => c.id)).ToList();
+
+                if (clientesNoExistentes.Any())
                 {
-                    return NotFound(new { message = "El cliente asociado no existe." });
+                    return NotFound(new { message = "Algunos clientes no existen.", clientesInexistentes = clientesNoExistentes });
                 }
 
-                existingVehiculo.clientes.Clear(); // Limpiar clientes previos si los hay
-                existingVehiculo.clientes.Add(clienteExistente); // Asociar el nuevo cliente
+                // Limpiamos los clientes actuales asociados al vehículo
+                existingVehiculo.clientes.Clear();
+
+                // Asociamos los clientes existentes al vehículo
+                existingVehiculo.clientes.AddRange(clientesExistentes);
             }
 
+            // Guardamos los cambios en la base de datos
             await _context.SaveChangesAsync();
 
-            // Crear el DTO de respuesta
+            // Creamos el DTO de respuesta
             var vehiculoUpdatedDto = new VehiculoDTO
             {
                 id = existingVehiculo.id,
@@ -361,20 +406,22 @@ public class VehiculoController : ControllerBase
                 modelo = existingVehiculo.modelo,
                 marca = existingVehiculo.marca,
                 color = existingVehiculo.color,
-                activo = existingVehiculo.activo,
-                created_at = existingVehiculo.created_at,
-                updated_at = existingVehiculo.updated_at,
-                ClienteNombre = string.Join(", ", existingVehiculo.clientes.Select(c => c.nombre))
+                activo = existingVehiculo.activo ?? false,
+                clientes = existingVehiculo.clientes.Select(c => new ClienteSummaryDTO
+                {
+                    Id = c.id,
+                    Nombre = c.nombre
+                }).ToList()
             };
 
-            return Ok(vehiculoUpdatedDto);  // Retorna el vehículo actualizado en formato DTO
+            return Ok(vehiculoUpdatedDto);
         }
         catch (Exception ex)
         {
-            // Manejo de excepciones
             return StatusCode(500, new { message = "Error en el servidor", details = ex.Message });
         }
     }
+
 
 
     [HttpPut("{vehiculoId}/asignar-clientes")]

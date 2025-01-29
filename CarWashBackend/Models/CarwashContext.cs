@@ -42,7 +42,7 @@ public partial class CarwashContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=localhost;database=Carwash;uid=root;pwd=P@ssWord.123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.40-mysql"));
+        => optionsBuilder.UseMySql("server=localhost;database=Carwash_DB;uid=root;pwd=P@ssWord.123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.40-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -87,6 +87,7 @@ public partial class CarwashContext : DbContext
                             .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
                         j.ToTable("cliente_vehiculo");
                         j.HasIndex(new[] { "vehiculo_id" }, "fk_vehiculo");
+                        j.HasIndex(new[] { "cliente_id", "vehiculo_id" }, "unique_cliente_vehiculo").IsUnique();
                         j.IndexerProperty<string>("cliente_id").HasMaxLength(36);
                         j.IndexerProperty<string>("vehiculo_id").HasMaxLength(36);
                     });
@@ -261,7 +262,6 @@ public partial class CarwashContext : DbContext
                 .IsRequired()
                 .HasMaxLength(100);
             entity.Property(e => e.updated_at)
-                .ValueGeneratedOnAddOrUpdate()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
 
@@ -348,15 +348,10 @@ public partial class CarwashContext : DbContext
         {
             entity.HasKey(e => e.id).HasName("PRIMARY");
 
-            entity.HasIndex(e => e.cliente_id, "cliente_id1");
-
             entity.HasIndex(e => e.placa, "placa").IsUnique();
 
             entity.Property(e => e.id).HasMaxLength(36);
             entity.Property(e => e.activo).HasDefaultValueSql("'1'");
-            entity.Property(e => e.cliente_id)
-                .IsRequired()
-                .HasMaxLength(36);
             entity.Property(e => e.color).HasMaxLength(30);
             entity.Property(e => e.created_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")

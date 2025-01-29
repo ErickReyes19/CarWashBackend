@@ -9,8 +9,6 @@ public partial class Vehiculo
 {
     public string id { get; set; }
 
-    public string cliente_id { get; set; }
-
     public string placa { get; set; }
 
     public string modelo { get; set; }

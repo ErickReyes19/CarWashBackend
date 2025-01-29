@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using CarWashBackend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using CarWashBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
 [Route("api/[controller]")]

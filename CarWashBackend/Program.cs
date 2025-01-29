@@ -1,3 +1,4 @@
+using CarWashBackend.Data;
 using CarWashBackend.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -35,7 +36,15 @@ builder.Services.AddAuthorization();
 
 
 
+
 var app = builder.Build();
+
+//using (var scope = app.Services.CreateScope())
+//{
+//    var context = scope.ServiceProvider.GetRequiredService<CarwashContext>();
+//    var seeder = new Seeder(context);
+//    seeder.Seed();
+//}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
