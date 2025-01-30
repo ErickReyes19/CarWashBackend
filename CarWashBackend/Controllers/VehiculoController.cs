@@ -183,7 +183,9 @@ public class VehiculoController : ControllerBase
                 }
 
                 // Si el vehículo existe pero no está asignado a ningún cliente
-                return Conflict(new { message = "Ya existe un vehículo con la misma placa, pero no está asignado a un cliente." });
+                return Conflict(new { message = "Ya existe un vehículo con la misma placa, pero no está asignado a un cliente." ,
+                    idVehiculo = existingVehiculo.id,
+                });
             }
 
             // Verificar que los clientes asociados existen
