@@ -23,6 +23,8 @@ public partial class Usuario
 
     public bool? activo { get; set; }
 
+    public virtual ICollection<RegistroServicio> RegistroServicios { get; set; } = new List<RegistroServicio>();
+
     public virtual Empleado empleado { get; set; }
 
     public virtual Role role { get; set; }

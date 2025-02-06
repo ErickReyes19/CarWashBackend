@@ -35,7 +35,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "pagos",
+         "Name": "Pagos",
          "ObjectType": 0
       },
       {
@@ -43,15 +43,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "registro_servicio",
-         "ObjectType": 0
-      },
-      {
-         "Name": "registro_servicio_detalle",
-         "ObjectType": 0
-      },
-      {
-         "Name": "registro_servicio_vehiculo",
+         "Name": "RegistroServicios",
          "ObjectType": 0
       },
       {

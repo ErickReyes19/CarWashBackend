@@ -1,17 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using CarWashBackend.Models;
+﻿using CarWashBackend.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace TuProyecto.Controllers
+namespace CarWashBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Esto asegura que solo usuarios autenticados puedan acceder
+    [Authorize] // Asegura que solo usuarios autenticados puedan acceder
     public class RegistroServicioController : ControllerBase
     {
         private readonly CarwashContext _context;
@@ -168,8 +164,60 @@ namespace TuProyecto.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(registros);
+            if (registros == null || !registros.Any())
+                return NotFound("No se encontraron registros de servicios.");
+
+            var registrosDto = registros.Select(r => new RegistroServicioDTO
+            {
+                id = r.id,
+                cliente_id = r.cliente_id,
+                vehiculo_id = r.vehiculo_id,
+                servicio_id = r.servicio_id,
+                usuario_id = r.usuario_id,
+                estado_id = r.estado_id,
+                observaciones = r.observaciones,
+                fecha = r.fecha,
+                created_at = r.created_at,
+                updated_at = r.updated_at,
+                cliente = new ClienteSummaryDTO
+                {
+                    Id = r.cliente.id,
+                    Nombre = r.cliente.nombre
+                },
+                vehiculo = new VehiculoSummaryDTO
+                {
+                    Id = r.vehiculo.id,
+                    Marca = r.vehiculo.marca
+                },
+                servicio = new ServicioSummaryDTO
+                {
+                    Id = r.servicio.id,
+                    Nombre = r.servicio.nombre
+                },
+                usuario = new UsuarioSummaryDTO
+                {
+                    Id = r.usuario.id,
+                    Usuario = r.usuario.usuario1
+                },
+                estado = new EstadosServicioSummaryDTO
+                {
+                    Id = r.estado.id,
+                    Nombre = r.estado.nombre
+                },
+                Pagos = r.Pagos.Select(p => new PagoSummaryDTO
+                {
+                    id = p.id,
+                    monto = p.monto,
+                    metodo_pago = p.metodo_pago,
+                    fecha = p.fecha
+                }).ToList() // Mapea los pagos relacionados
+            }).ToList();
+
+
+            return Ok(registrosDto);
         }
+
+
 
         // GET: api/RegistroServicio/{id}
         [HttpGet("{id}")]
@@ -187,33 +235,36 @@ namespace TuProyecto.Controllers
                 .FirstOrDefaultAsync(rs => rs.id == id);
 
             if (registro == null)
-            {
-                return NotFound("Registro de servicio no encontrado.");
-            }
+                return NotFound($"No se encontró un registro de servicio con el ID {id}.");
 
-            // Mapeo a DTO
-            var dto = new RegistroServicioDetailDto
+            var registroDto = new RegistroServicioDTO
             {
-                Id = registro.id,
-                Fecha = registro.fecha,
-                Cliente = new ClienteDto
+                id = registro.id,
+                cliente_id = registro.cliente_id,
+                vehiculo_id = registro.vehiculo_id,
+                servicio_id = registro.servicio_id,
+                usuario_id = registro.usuario_id,
+                estado_id = registro.estado_id,
+                observaciones = registro.observaciones,
+                fecha = registro.fecha,
+                created_at = registro.created_at,
+                updated_at = registro.updated_at,
+                cliente = new ClienteSummaryDTO
                 {
                     Id = registro.cliente.id,
-                    Nombre = registro.cliente.nombre,
-                    Correo = registro.cliente.correo,
-                    Telefono = registro.cliente.telefono
+                    Nombre = registro.cliente.nombre
                 },
-                Usuario = new UsuarioDto
+                vehiculo = new VehiculoSummaryDTO
                 {
-                    Id = registro.usuario_id
+                    Id = registro.vehiculo.id,
+                    Marca = registro.vehiculo.marca
                 },
-                EstadoServicio = new EstadosServicioDto
+                servicio = new ServicioSummaryDTO
                 {
-                    Id = registro.estado_servicio.id,
-                    Nombre = registro.estado_servicio.nombre,
-                    Descripcion = registro.estado_servicio.descripcion
+                    Id = registro.servicio.id,
+                    Nombre = registro.servicio.nombre
                 },
-                Vehiculos = registro.registro_servicio_vehiculos.Select(rsv => new RegistroServicioVehiculoDetailDto
+                usuario = new UsuarioSummaryDTO
                 {
                     Id = rsv.id,
                     Vehiculo = new VehiculoDto
@@ -240,7 +291,84 @@ namespace TuProyecto.Controllers
                 }).ToList() // Aquí mapeas los empleados
             };
 
-            return Ok(dto);
+            return Ok(registroDto);
+        }
+
+        // POST: api/RegistroServicio
+        [HttpPost]
+        public async Task<IActionResult> CreateRegistroServicio(RegistroServicio registro)
+        {
+
+            Console.WriteLine($"Cliente ID: {registro.cliente_id} (Length: {registro.cliente_id.Length})");
+
+
+
+            if (registro == null)
+                return BadRequest("Los datos enviados son inválidos.");
+
+            registro.id = Guid.NewGuid().ToString();
+            registro.created_at = DateTime.UtcNow;
+            registro.updated_at = DateTime.UtcNow;
+
+            _context.RegistroServicios.Add(registro);
+            await _context.SaveChangesAsync();
+
+            var registroDto = new RegistroServicioDTO
+            {
+                id = registro.id,
+                cliente_id = registro.cliente_id,
+                vehiculo_id = registro.vehiculo_id,
+                servicio_id = registro.servicio_id,
+                usuario_id = registro.usuario_id,
+                estado_id = registro.estado_id,
+                observaciones = registro.observaciones,
+                fecha = registro.fecha,
+                created_at = registro.created_at,
+                updated_at = registro.updated_at
+            };
+
+            return CreatedAtAction(nameof(GetRegistroServicioById), new { id = registro.id }, registroDto);
+        }
+
+        // PUT: api/RegistroServicio/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateRegistroServicio(string id, RegistroServicio registro)
+        {
+            if (id != registro.id)
+                return BadRequest("El ID no coincide con el del registro de servicio enviado.");
+
+            var existingRegistro = await _context.RegistroServicios.FindAsync(id);
+
+            if (existingRegistro == null)
+                return NotFound($"No se encontró un registro de servicio con el ID {id}.");
+
+            existingRegistro.cliente_id = registro.cliente_id;
+            existingRegistro.vehiculo_id = registro.vehiculo_id;
+            existingRegistro.servicio_id = registro.servicio_id;
+            existingRegistro.usuario_id = registro.usuario_id;
+            existingRegistro.estado_id = registro.estado_id;
+            existingRegistro.observaciones = registro.observaciones;
+            existingRegistro.fecha = registro.fecha;
+            existingRegistro.updated_at = DateTime.UtcNow;
+
+            _context.RegistroServicios.Update(existingRegistro);
+            await _context.SaveChangesAsync();
+
+            var registroDto = new RegistroServicioDTO
+            {
+                id = existingRegistro.id,
+                cliente_id = existingRegistro.cliente_id,
+                vehiculo_id = existingRegistro.vehiculo_id,
+                servicio_id = existingRegistro.servicio_id,
+                usuario_id = existingRegistro.usuario_id,
+                estado_id = existingRegistro.estado_id,
+                observaciones = existingRegistro.observaciones,
+                fecha = existingRegistro.fecha,
+                created_at = existingRegistro.created_at,
+                updated_at = existingRegistro.updated_at
+            };
+
+            return Ok(registroDto);
         }
 
 
