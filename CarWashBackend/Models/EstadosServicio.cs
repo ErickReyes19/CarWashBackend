@@ -19,5 +19,5 @@ public partial class EstadosServicio
 
     public bool? activo { get; set; }
 
-    public virtual ICollection<RegistroServicio> RegistroServicios { get; set; } = new List<RegistroServicio>();
+    public virtual ICollection<registro_servicio> registro_servicios { get; set; } = new List<registro_servicio>();
 }

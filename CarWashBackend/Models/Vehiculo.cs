@@ -23,7 +23,7 @@ public partial class Vehiculo
 
     public DateTime? updated_at { get; set; }
 
-    public virtual ICollection<RegistroServicio> RegistroServicios { get; set; } = new List<RegistroServicio>();
+    public virtual ICollection<registro_servicio_vehiculo> registro_servicio_vehiculos { get; set; } = new List<registro_servicio_vehiculo>();
 
     public virtual ICollection<Cliente> clientes { get; set; } = new List<Cliente>();
 }
