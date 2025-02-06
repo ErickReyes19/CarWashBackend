@@ -42,6 +42,14 @@ public partial class CarwashContext : DbContext
 
     public virtual DbSet<registro_servicio_vehiculo> registro_servicio_vehiculos { get; set; }
 
+    public virtual DbSet<pago> pagos { get; set; }
+
+    public virtual DbSet<registro_servicio> registro_servicios { get; set; }
+
+    public virtual DbSet<registro_servicio_detalle> registro_servicio_detalles { get; set; }
+
+    public virtual DbSet<registro_servicio_vehiculo> registro_servicio_vehiculos { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseMySql("server=localhost;database=Carwash_DB;uid=root;pwd=P@ssWord.123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.41-mysql"));
@@ -364,6 +372,112 @@ public partial class CarwashContext : DbContext
             entity.ToTable("registro_servicio_vehiculo");
 
             entity.HasIndex(e => e.registro_servicio_id, "registro_servicio_id1");
+
+            entity.HasIndex(e => e.vehiculo_id, "vehiculo_id");
+
+            entity.Property(e => e.id).HasMaxLength(50);
+            entity.Property(e => e.registro_servicio_id)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.vehiculo_id)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasOne(d => d.registro_servicio).WithMany(p => p.registro_servicio_vehiculos)
+                .HasForeignKey(d => d.registro_servicio_id)
+                .HasConstraintName("registro_servicio_vehiculo_ibfk_1");
+
+            entity.HasOne(d => d.vehiculo).WithMany(p => p.registro_servicio_vehiculos)
+                .HasForeignKey(d => d.vehiculo_id)
+                .HasConstraintName("registro_servicio_vehiculo_ibfk_2");
+        });
+
+        modelBuilder.Entity<pago>(entity =>
+        {
+            entity.HasKey(e => e.id).HasName("PRIMARY");
+
+            entity.HasIndex(e => e.registro_servicio_id, "registro_servicio_id");
+
+            entity.Property(e => e.id).HasMaxLength(50);
+            entity.Property(e => e.metodo_pago)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.monto).HasPrecision(10, 2);
+            entity.Property(e => e.registro_servicio_id)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasOne(d => d.registro_servicio).WithMany(p => p.pagos)
+                .HasForeignKey(d => d.registro_servicio_id)
+                .HasConstraintName("pagos_ibfk_1");
+        });
+
+        modelBuilder.Entity<registro_servicio>(entity =>
+        {
+            entity.HasKey(e => e.id).HasName("PRIMARY");
+
+            entity.ToTable("registro_servicio");
+
+            entity.HasIndex(e => e.cliente_id, "cliente_id");
+
+            entity.HasIndex(e => e.estado_servicio_id, "fk_estado_servicio");
+
+            entity.Property(e => e.id).HasMaxLength(50);
+            entity.Property(e => e.cliente_id)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.estado_servicio_id).HasMaxLength(36);
+            entity.Property(e => e.fecha)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("datetime");
+            entity.Property(e => e.usuario_id).HasMaxLength(50);
+
+            entity.HasOne(d => d.cliente).WithMany(p => p.registro_servicios)
+                .HasForeignKey(d => d.cliente_id)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("registro_servicio_ibfk_1");
+
+            entity.HasOne(d => d.estado_servicio).WithMany(p => p.registro_servicios)
+                .HasForeignKey(d => d.estado_servicio_id)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("fk_estado_servicio");
+        });
+
+        modelBuilder.Entity<registro_servicio_detalle>(entity =>
+        {
+            entity.HasKey(e => e.id).HasName("PRIMARY");
+
+            entity.ToTable("registro_servicio_detalle");
+
+            entity.HasIndex(e => e.registro_servicio_vehiculo_id, "registro_servicio_vehiculo_id");
+
+            entity.HasIndex(e => e.servicio_id, "servicio_id");
+
+            entity.Property(e => e.id).HasMaxLength(50);
+            entity.Property(e => e.precio).HasPrecision(10, 2);
+            entity.Property(e => e.registro_servicio_vehiculo_id)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.servicio_id)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasOne(d => d.registro_servicio_vehiculo).WithMany(p => p.registro_servicio_detalles)
+                .HasForeignKey(d => d.registro_servicio_vehiculo_id)
+                .HasConstraintName("registro_servicio_detalle_ibfk_1");
+
+            entity.HasOne(d => d.servicio).WithMany(p => p.registro_servicio_detalles)
+                .HasForeignKey(d => d.servicio_id)
+                .HasConstraintName("registro_servicio_detalle_ibfk_2");
+        });
+
+        modelBuilder.Entity<registro_servicio_vehiculo>(entity =>
+        {
+            entity.HasKey(e => e.id).HasName("PRIMARY");
+
+            entity.ToTable("registro_servicio_vehiculo");
+
+            entity.HasIndex(e => e.registro_servicio_id, "registro_servicio_id");
 
             entity.HasIndex(e => e.vehiculo_id, "vehiculo_id");
 

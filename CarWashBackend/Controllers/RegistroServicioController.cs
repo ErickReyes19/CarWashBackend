@@ -107,6 +107,15 @@ namespace TuProyecto.Controllers
             });
         }
 
+            // 1. Crear el registro de servicio principal (tabla: registro_servicio)
+            var registroServicio = new registro_servicio
+            {
+                id = Guid.NewGuid().ToString(),
+                cliente_id = dto.ClienteId,
+                estado_servicio_id = dto.EstadoServicioId,
+                usuario_id = dto.UsuarioId,
+                fecha = DateTime.UtcNow
+            };
 
         [HttpGet("summary")]
         public async Task<IActionResult> GetAllResumen(DateTime? fechaDesde, DateTime? fechaHasta)
@@ -142,7 +151,25 @@ namespace TuProyecto.Controllers
             return Ok(registros);
         }
 
+        // GET: api/RegistroServicio/summary
+        [HttpGet("summary")]
+        public async Task<IActionResult> GetAllResumen()
+        {
+            var registros = await _context.registro_servicios
+                .Include(rs => rs.cliente)
+                .Include(rs => rs.estado_servicio)
+                .Select(rs => new RegistroServicioSummaryDto
+                {
+                    Id = rs.id,
+                    ClienteNombre = rs.cliente.nombre,
+                    ClienteCorreo = rs.cliente.correo,
+                    EstadoServicioNombre = rs.estado_servicio.nombre,
+                    Fecha = rs.fecha
+                })
+                .ToListAsync();
 
+            return Ok(registros);
+        }
 
         // GET: api/RegistroServicio/{id}
         [HttpGet("{id}")]
