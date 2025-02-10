@@ -16,7 +16,15 @@ public class RegistroServicioMultipleDto
     public string UsuarioId { get; set; }
     public string EstadoServicioId { get; set; }
     public List<RegistroServicioVehiculoDto> Vehiculos { get; set; }
+    public List<EmpleadoIdDto> Empleados { get; set; }
 }
+
+
+public class EmpleadoIdDto
+{
+    public string EmpleadoId { get; set; }
+}
+
 
 public class RegistroServicioSummaryDto
 {
@@ -81,5 +89,15 @@ public class RegistroServicioDetailDto
     public EstadosServicioDto EstadoServicio { get; set; }
     public DateTime Fecha { get; set; }
     public List<RegistroServicioVehiculoDetailDto> Vehiculos { get; set; }
+    public List<EmpleadoDto> Empleados { get; set; } // Nueva propiedad para empleados
+}
+
+
+public class EmpleadoDto
+{
+    public string Id { get; set; }
+    public string Nombre { get; set; }
+    public string Apellido { get; set; }
+    public string Correo { get; set; }
 }
 

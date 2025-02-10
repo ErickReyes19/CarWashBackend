@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarWashBackend.Migrations
 {
     [DbContext(typeof(CarwashContext))]
-    [Migration("20250125062327_CambiosEnRelacionVehiculos")]
-    partial class CambiosEnRelacionVehiculos
+    [Migration("20250210205012_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -158,48 +158,6 @@ namespace CarWashBackend.Migrations
                     b.ToTable("EstadosServicios");
                 });
 
-            modelBuilder.Entity("CarWashBackend.Models.Pago", b =>
-                {
-                    b.Property<string>("id")
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)");
-
-                    b.Property<DateTime?>("created_at")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<DateTime?>("fecha")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("metodo_pago")
-                        .IsRequired()
-                        .HasColumnType("enum('Efectivo','Tarjeta','Transferencia')");
-
-                    b.Property<decimal>("monto")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<string>("registro_servicio_id")
-                        .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)");
-
-                    b.Property<DateTime?>("updated_at")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.HasKey("id")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex(new[] { "registro_servicio_id" }, "registro_servicio_id");
-
-                    b.ToTable("Pagos");
-                });
-
             modelBuilder.Entity("CarWashBackend.Models.Permiso", b =>
                 {
                     b.Property<string>("id")
@@ -238,78 +196,13 @@ namespace CarWashBackend.Migrations
                     b.ToTable("Permisos");
                 });
 
-            modelBuilder.Entity("CarWashBackend.Models.RegistroServicio", b =>
-                {
-                    b.Property<string>("id")
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)");
-
-                    b.Property<string>("cliente_id")
-                        .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)");
-
-                    b.Property<DateTime?>("created_at")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("estado_id")
-                        .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)");
-
-                    b.Property<DateTime?>("fecha")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("observaciones")
-                        .HasColumnType("text");
-
-                    b.Property<string>("servicio_id")
-                        .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)");
-
-                    b.Property<DateTime?>("updated_at")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("usuario_id")
-                        .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)");
-
-                    b.Property<string>("vehiculo_id")
-                        .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)");
-
-                    b.HasKey("id")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex(new[] { "cliente_id" }, "cliente_id");
-
-                    b.HasIndex(new[] { "estado_id" }, "estado_id");
-
-                    b.HasIndex(new[] { "servicio_id" }, "servicio_id");
-
-                    b.HasIndex(new[] { "usuario_id" }, "usuario_id");
-
-                    b.HasIndex(new[] { "vehiculo_id" }, "vehiculo_id");
-
-                    b.ToTable("RegistroServicios");
-                });
-
             modelBuilder.Entity("CarWashBackend.Models.Role", b =>
                 {
                     b.Property<string>("id")
                         .HasMaxLength(36)
                         .HasColumnType("varchar(36)");
 
-                    b.Property<bool?>("activo")
+                    b.Property<bool>("activo")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValueSql("'1'");
@@ -328,7 +221,7 @@ namespace CarWashBackend.Migrations
                         .HasColumnType("varchar(100)");
 
                     b.Property<DateTime?>("updated_at")
-                        .ValueGeneratedOnAddOrUpdate()
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
@@ -441,11 +334,6 @@ namespace CarWashBackend.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValueSql("'1'");
 
-                    b.Property<string>("cliente_id")
-                        .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)");
-
                     b.Property<string>("color")
                         .HasMaxLength(30)
                         .HasColumnType("varchar(30)");
@@ -476,12 +364,129 @@ namespace CarWashBackend.Migrations
                     b.HasKey("id")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "cliente_id" }, "cliente_id1");
-
                     b.HasIndex(new[] { "placa" }, "placa")
                         .IsUnique();
 
                     b.ToTable("Vehiculos");
+                });
+
+            modelBuilder.Entity("CarWashBackend.Models.pago", b =>
+                {
+                    b.Property<string>("id")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("metodo_pago")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<decimal>("monto")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("registro_servicio_id")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex(new[] { "registro_servicio_id" }, "registro_servicio_id");
+
+                    b.ToTable("pagos");
+                });
+
+            modelBuilder.Entity("CarWashBackend.Models.registro_servicio", b =>
+                {
+                    b.Property<string>("id")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("cliente_id")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("estado_servicio_id")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)");
+
+                    b.Property<DateTime>("fecha")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("usuario_id")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex(new[] { "cliente_id" }, "cliente_id");
+
+                    b.HasIndex(new[] { "estado_servicio_id" }, "fk_estado_servicio");
+
+                    b.ToTable("registro_servicio", (string)null);
+                });
+
+            modelBuilder.Entity("CarWashBackend.Models.registro_servicio_detalle", b =>
+                {
+                    b.Property<string>("id")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<decimal>("precio")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("registro_servicio_vehiculo_id")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("servicio_id")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex(new[] { "registro_servicio_vehiculo_id" }, "registro_servicio_vehiculo_id");
+
+                    b.HasIndex(new[] { "servicio_id" }, "servicio_id");
+
+                    b.ToTable("registro_servicio_detalle", (string)null);
+                });
+
+            modelBuilder.Entity("CarWashBackend.Models.registro_servicio_vehiculo", b =>
+                {
+                    b.Property<string>("id")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("registro_servicio_id")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("vehiculo_id")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex(new[] { "registro_servicio_id" }, "registro_servicio_id")
+                        .HasDatabaseName("registro_servicio_id1");
+
+                    b.HasIndex(new[] { "vehiculo_id" }, "vehiculo_id");
+
+                    b.ToTable("registro_servicio_vehiculo", (string)null);
                 });
 
             modelBuilder.Entity("RolePermiso", b =>
@@ -519,67 +524,10 @@ namespace CarWashBackend.Migrations
 
                     b.HasIndex(new[] { "vehiculo_id" }, "fk_vehiculo");
 
+                    b.HasIndex(new[] { "cliente_id", "vehiculo_id" }, "unique_cliente_vehiculo")
+                        .IsUnique();
+
                     b.ToTable("cliente_vehiculo", (string)null);
-                });
-
-            modelBuilder.Entity("CarWashBackend.Models.Pago", b =>
-                {
-                    b.HasOne("CarWashBackend.Models.RegistroServicio", "registro_servicio")
-                        .WithMany("Pagos")
-                        .HasForeignKey("registro_servicio_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("Pagos_ibfk_1");
-
-                    b.Navigation("registro_servicio");
-                });
-
-            modelBuilder.Entity("CarWashBackend.Models.RegistroServicio", b =>
-                {
-                    b.HasOne("CarWashBackend.Models.Cliente", "cliente")
-                        .WithMany("RegistroServicios")
-                        .HasForeignKey("cliente_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("RegistroServicios_ibfk_1");
-
-                    b.HasOne("CarWashBackend.Models.EstadosServicio", "estado")
-                        .WithMany("RegistroServicios")
-                        .HasForeignKey("estado_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("RegistroServicios_ibfk_5");
-
-                    b.HasOne("CarWashBackend.Models.Servicio", "servicio")
-                        .WithMany("RegistroServicios")
-                        .HasForeignKey("servicio_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("RegistroServicios_ibfk_3");
-
-                    b.HasOne("CarWashBackend.Models.Usuario", "usuario")
-                        .WithMany("RegistroServicios")
-                        .HasForeignKey("usuario_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("RegistroServicios_ibfk_4");
-
-                    b.HasOne("CarWashBackend.Models.Vehiculo", "vehiculo")
-                        .WithMany("RegistroServicios")
-                        .HasForeignKey("vehiculo_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("RegistroServicios_ibfk_2");
-
-                    b.Navigation("cliente");
-
-                    b.Navigation("estado");
-
-                    b.Navigation("servicio");
-
-                    b.Navigation("usuario");
-
-                    b.Navigation("vehiculo");
                 });
 
             modelBuilder.Entity("CarWashBackend.Models.Usuario", b =>
@@ -599,6 +547,79 @@ namespace CarWashBackend.Migrations
                     b.Navigation("empleado");
 
                     b.Navigation("role");
+                });
+
+            modelBuilder.Entity("CarWashBackend.Models.pago", b =>
+                {
+                    b.HasOne("CarWashBackend.Models.registro_servicio", "registro_servicio")
+                        .WithMany("pagos")
+                        .HasForeignKey("registro_servicio_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("pagos_ibfk_1");
+
+                    b.Navigation("registro_servicio");
+                });
+
+            modelBuilder.Entity("CarWashBackend.Models.registro_servicio", b =>
+                {
+                    b.HasOne("CarWashBackend.Models.Cliente", "cliente")
+                        .WithMany("registro_servicios")
+                        .HasForeignKey("cliente_id")
+                        .IsRequired()
+                        .HasConstraintName("registro_servicio_ibfk_1");
+
+                    b.HasOne("CarWashBackend.Models.EstadosServicio", "estado_servicio")
+                        .WithMany("registro_servicios")
+                        .HasForeignKey("estado_servicio_id")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_estado_servicio");
+
+                    b.Navigation("cliente");
+
+                    b.Navigation("estado_servicio");
+                });
+
+            modelBuilder.Entity("CarWashBackend.Models.registro_servicio_detalle", b =>
+                {
+                    b.HasOne("CarWashBackend.Models.registro_servicio_vehiculo", "registro_servicio_vehiculo")
+                        .WithMany("registro_servicio_detalles")
+                        .HasForeignKey("registro_servicio_vehiculo_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("registro_servicio_detalle_ibfk_1");
+
+                    b.HasOne("CarWashBackend.Models.Servicio", "servicio")
+                        .WithMany("registro_servicio_detalles")
+                        .HasForeignKey("servicio_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("registro_servicio_detalle_ibfk_2");
+
+                    b.Navigation("registro_servicio_vehiculo");
+
+                    b.Navigation("servicio");
+                });
+
+            modelBuilder.Entity("CarWashBackend.Models.registro_servicio_vehiculo", b =>
+                {
+                    b.HasOne("CarWashBackend.Models.registro_servicio", "registro_servicio")
+                        .WithMany("registro_servicio_vehiculos")
+                        .HasForeignKey("registro_servicio_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("registro_servicio_vehiculo_ibfk_1");
+
+                    b.HasOne("CarWashBackend.Models.Vehiculo", "vehiculo")
+                        .WithMany("registro_servicio_vehiculos")
+                        .HasForeignKey("vehiculo_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("registro_servicio_vehiculo_ibfk_2");
+
+                    b.Navigation("registro_servicio");
+
+                    b.Navigation("vehiculo");
                 });
 
             modelBuilder.Entity("RolePermiso", b =>
@@ -637,7 +658,7 @@ namespace CarWashBackend.Migrations
 
             modelBuilder.Entity("CarWashBackend.Models.Cliente", b =>
                 {
-                    b.Navigation("RegistroServicios");
+                    b.Navigation("registro_servicios");
                 });
 
             modelBuilder.Entity("CarWashBackend.Models.Empleado", b =>
@@ -647,12 +668,7 @@ namespace CarWashBackend.Migrations
 
             modelBuilder.Entity("CarWashBackend.Models.EstadosServicio", b =>
                 {
-                    b.Navigation("RegistroServicios");
-                });
-
-            modelBuilder.Entity("CarWashBackend.Models.RegistroServicio", b =>
-                {
-                    b.Navigation("Pagos");
+                    b.Navigation("registro_servicios");
                 });
 
             modelBuilder.Entity("CarWashBackend.Models.Role", b =>
@@ -662,17 +678,24 @@ namespace CarWashBackend.Migrations
 
             modelBuilder.Entity("CarWashBackend.Models.Servicio", b =>
                 {
-                    b.Navigation("RegistroServicios");
-                });
-
-            modelBuilder.Entity("CarWashBackend.Models.Usuario", b =>
-                {
-                    b.Navigation("RegistroServicios");
+                    b.Navigation("registro_servicio_detalles");
                 });
 
             modelBuilder.Entity("CarWashBackend.Models.Vehiculo", b =>
                 {
-                    b.Navigation("RegistroServicios");
+                    b.Navigation("registro_servicio_vehiculos");
+                });
+
+            modelBuilder.Entity("CarWashBackend.Models.registro_servicio", b =>
+                {
+                    b.Navigation("pagos");
+
+                    b.Navigation("registro_servicio_vehiculos");
+                });
+
+            modelBuilder.Entity("CarWashBackend.Models.registro_servicio_vehiculo", b =>
+                {
+                    b.Navigation("registro_servicio_detalles");
                 });
 #pragma warning restore 612, 618
         }

@@ -24,4 +24,6 @@ public partial class registro_servicio
     public virtual ICollection<pago> pagos { get; set; } = new List<pago>();
 
     public virtual ICollection<registro_servicio_vehiculo> registro_servicio_vehiculos { get; set; } = new List<registro_servicio_vehiculo>();
+
+    public virtual ICollection<Empleado> empleados { get; set; } = new List<Empleado>();
 }

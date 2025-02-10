@@ -20,7 +20,6 @@ namespace TuProyecto.Controllers
         {
             _context = context;
         }
-
         [HttpPost("multiple")]
         public async Task<IActionResult> CreateRegistroServicioMultiple([FromBody] RegistroServicioMultipleDto dto)
         {
@@ -47,16 +46,36 @@ namespace TuProyecto.Controllers
             _context.registro_servicios.Add(registroServicio);
             await _context.SaveChangesAsync();
 
-            // 2. Para cada vehículo, se crea el registro en registro_servicio_vehiculo y sus detalles
-            foreach (var vehiculoDto in dto.Vehiculos)
+            // 2. Agregar empleados a la tabla intermedia "empleado_registro_servicio"
+            if (dto.Empleados != null && dto.Empleados.Any())
             {
-                // Validar que se incluya el id del vehículo
-                if (string.IsNullOrEmpty(vehiculoDto.VehiculoId) || vehiculoDto.Servicios == null || !vehiculoDto.Servicios.Any())
+                foreach (var empleadoDto in dto.Empleados)
                 {
-                    continue; // O bien, podrías retornar un error indicando que la información del vehículo es insuficiente.
+                    // Busca el empleado
+                    var empleado = await _context.Empleados.FindAsync(empleadoDto.EmpleadoId);
+                    if (empleado != null)
+                    {
+                        // Crear la relación en la tabla intermedia directamente
+                        _context.Add(new
+                        {
+                            empleado_id = empleadoDto.EmpleadoId,
+                            registro_servicio_id = registroServicio.id
+                        });
+                    }
                 }
 
-                // Registro de servicio para el vehículo (tabla: registro_servicio_vehiculo)
+                // Guardar los cambios para la relación empleados-registro_servicio
+                await _context.SaveChangesAsync();
+            }
+
+            // 3. Para cada vehículo, se crea el registro en registro_servicio_vehiculo y sus detalles
+            foreach (var vehiculoDto in dto.Vehiculos)
+            {
+                if (string.IsNullOrEmpty(vehiculoDto.VehiculoId) || vehiculoDto.Servicios == null || !vehiculoDto.Servicios.Any())
+                {
+                    continue;
+                }
+
                 var registroServicioVehiculo = new registro_servicio_vehiculo
                 {
                     id = Guid.NewGuid().ToString(),
@@ -67,12 +86,10 @@ namespace TuProyecto.Controllers
                 _context.registro_servicio_vehiculos.Add(registroServicioVehiculo);
                 await _context.SaveChangesAsync();
 
-                // 3. Por cada servicio del vehículo, se crea un detalle en registro_servicio_detalle
                 foreach (var servicio in vehiculoDto.Servicios)
                 {
-                    // Validar que se incluya el id del servicio
                     if (string.IsNullOrEmpty(servicio.ServicioId))
-                        continue; // o retorna error
+                        continue;
 
                     var registroServicioDetalle = new registro_servicio_detalle
                     {
@@ -93,6 +110,7 @@ namespace TuProyecto.Controllers
                 registroServicioId = registroServicio.id
             });
         }
+
 
         // GET: api/RegistroServicio/summary
         [HttpGet("summary")]
@@ -126,6 +144,7 @@ namespace TuProyecto.Controllers
                 .Include(rs => rs.registro_servicio_vehiculos)
                     .ThenInclude(rsv => rsv.registro_servicio_detalles)
                         .ThenInclude(rsd => rsd.servicio)
+                .Include(rs => rs.empleados) // Aquí accedes a la relación empleados
                 .FirstOrDefaultAsync(rs => rs.id == id);
 
             if (registro == null)
@@ -169,13 +188,22 @@ namespace TuProyecto.Controllers
                     Servicios = rsv.registro_servicio_detalles.Select(rsd => new ServicioDetailDto
                     {
                         Id = rsd.id,
-                        ServicioNombre = rsd.servicio.nombre, // asumiendo que Servicio tiene la propiedad "nombre"
+                        ServicioNombre = rsd.servicio.nombre,
                         Precio = rsd.precio
                     }).ToList()
-                }).ToList()
+                }).ToList(),
+                Empleados = registro.empleados.Select(rse => new EmpleadoDto
+                {
+                    Id = rse.id,
+                    Nombre = rse.nombre,
+                    Apellido = rse.apellido,
+                    Correo = rse.correo
+                }).ToList() // Aquí mapeas los empleados
             };
 
             return Ok(dto);
         }
+
+
     }
 }

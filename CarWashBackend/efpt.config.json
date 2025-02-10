@@ -15,15 +15,15 @@
    "T4TemplatePath": null,
    "Tables": [
       {
-         "Name": "__EFMigrationsHistory",
-         "ObjectType": 0
-      },
-      {
          "Name": "cliente_vehiculo",
          "ObjectType": 0
       },
       {
          "Name": "Clientes",
+         "ObjectType": 0
+      },
+      {
+         "Name": "empleado_registro_servicio",
          "ObjectType": 0
       },
       {
@@ -88,6 +88,7 @@
    "UseHandleBars": false,
    "UseHierarchyId": false,
    "UseInflector": true,
+   "UseInternalAccessModifiersForSprocsAndFunctions": false,
    "UseLegacyPluralizer": false,
    "UseManyToManyEntity": false,
    "UseNoDefaultConstructor": false,

@@ -34,8 +34,6 @@ public partial class CarwashContext : DbContext
 
     public virtual DbSet<Vehiculo> Vehiculos { get; set; }
 
-    public virtual DbSet<__EFMigrationsHistory> __EFMigrationsHistories { get; set; }
-
     public virtual DbSet<pago> pagos { get; set; }
 
     public virtual DbSet<registro_servicio> registro_servicios { get; set; }
@@ -46,7 +44,7 @@ public partial class CarwashContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=localhost;database=Carwash_DB;uid=root;pwd=P@ssWord.123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.40-mysql"));
+        => optionsBuilder.UseMySql("server=localhost;database=Carwash_DB;uid=root;pwd=P@ssWord.123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.41-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -119,6 +117,26 @@ public partial class CarwashContext : DbContext
             entity.Property(e => e.updated_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
+
+            entity.HasMany(d => d.registro_servicios).WithMany(p => p.empleados)
+                .UsingEntity<Dictionary<string, object>>(
+                    "empleado_registro_servicio",
+                    r => r.HasOne<registro_servicio>().WithMany()
+                        .HasForeignKey("registro_servicio_id")
+                        .HasConstraintName("empleado_registro_servicio_ibfk_2"),
+                    l => l.HasOne<Empleado>().WithMany()
+                        .HasForeignKey("empleado_id")
+                        .HasConstraintName("empleado_registro_servicio_ibfk_1"),
+                    j =>
+                    {
+                        j.HasKey("empleado_id", "registro_servicio_id")
+                            .HasName("PRIMARY")
+                            .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
+                        j.ToTable("empleado_registro_servicio");
+                        j.HasIndex(new[] { "registro_servicio_id" }, "registro_servicio_id");
+                        j.IndexerProperty<string>("empleado_id").HasMaxLength(36);
+                        j.IndexerProperty<string>("registro_servicio_id").HasMaxLength(36);
+                    });
         });
 
         modelBuilder.Entity<EstadosServicio>(entity =>
@@ -279,18 +297,6 @@ public partial class CarwashContext : DbContext
                 .HasColumnType("datetime");
         });
 
-        modelBuilder.Entity<__EFMigrationsHistory>(entity =>
-        {
-            entity.HasKey(e => e.MigrationId).HasName("PRIMARY");
-
-            entity.ToTable("__EFMigrationsHistory");
-
-            entity.Property(e => e.MigrationId).HasMaxLength(150);
-            entity.Property(e => e.ProductVersion)
-                .IsRequired()
-                .HasMaxLength(32);
-        });
-
         modelBuilder.Entity<pago>(entity =>
         {
             entity.HasKey(e => e.id).HasName("PRIMARY");
@@ -376,7 +382,7 @@ public partial class CarwashContext : DbContext
 
             entity.ToTable("registro_servicio_vehiculo");
 
-            entity.HasIndex(e => e.registro_servicio_id, "registro_servicio_id");
+            entity.HasIndex(e => e.registro_servicio_id, "registro_servicio_id1");
 
             entity.HasIndex(e => e.vehiculo_id, "vehiculo_id");
 

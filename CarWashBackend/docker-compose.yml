@@ -6,7 +6,7 @@ services:
     container_name: mysql_carwash
     environment:
       MYSQL_ROOT_PASSWORD: "P@ssWord.123"
-      MYSQL_DATABASE: "Carwash"
+      MYSQL_DATABASE: "Carwash_DB"
     ports:
       - "3306:3306"
     volumes:
