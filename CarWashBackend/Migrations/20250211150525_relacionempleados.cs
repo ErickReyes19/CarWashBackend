@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CarWashBackend.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class relacionempleados : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -43,24 +43,24 @@ namespace CarWashBackend.Migrations
                 name: "Empleados",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false, collation: "utf8mb4_0900_ai_ci")
+                    id = table.Column<string>(type: "varchar(255)", nullable: false, collation: "utf8mb4_0900_ai_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    nombre = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false, collation: "utf8mb4_0900_ai_ci")
+                    nombre = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_0900_ai_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    apellido = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false, collation: "utf8mb4_0900_ai_ci")
+                    apellido = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_0900_ai_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    correo = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true, collation: "utf8mb4_0900_ai_ci")
+                    correo = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_0900_ai_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     edad = table.Column<int>(type: "int", nullable: true),
-                    genero = table.Column<string>(type: "enum('Masculino','Femenino','Otro')", nullable: true, collation: "utf8mb4_0900_ai_ci")
+                    genero = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_0900_ai_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    activo = table.Column<bool>(type: "tinyint(1)", nullable: true, defaultValueSql: "'1'"),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "CURRENT_TIMESTAMP")
+                    activo = table.Column<bool>(type: "tinyint(1)", nullable: true),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => x.id);
+                    table.PrimaryKey("PK_Empleados", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
@@ -303,6 +303,35 @@ namespace CarWashBackend.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
 
             migrationBuilder.CreateTable(
+                name: "empleado_registro_servicio",
+                columns: table => new
+                {
+                    empleado_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false, collation: "utf8mb4_0900_ai_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    registro_servicio_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false, collation: "utf8mb4_0900_ai_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => new { x.empleado_id, x.registro_servicio_id })
+                        .Annotation("MySql:IndexPrefixLength", new[] { 0, 0 });
+                    table.ForeignKey(
+                        name: "fk_empleado_registro_servicio_empleado",
+                        column: x => x.empleado_id,
+                        principalTable: "Empleados",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_empleado_registro_servicio_registro_servicio",
+                        column: x => x.registro_servicio_id,
+                        principalTable: "registro_servicio",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
+
+            migrationBuilder.CreateTable(
                 name: "pagos",
                 columns: table => new
                 {
@@ -406,10 +435,9 @@ namespace CarWashBackend.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "correo1",
-                table: "Empleados",
-                column: "correo",
-                unique: true);
+                name: "idx_registro_servicio_id",
+                table: "empleado_registro_servicio",
+                column: "registro_servicio_id");
 
             migrationBuilder.CreateIndex(
                 name: "registro_servicio_id",
@@ -485,6 +513,9 @@ namespace CarWashBackend.Migrations
         {
             migrationBuilder.DropTable(
                 name: "cliente_vehiculo");
+
+            migrationBuilder.DropTable(
+                name: "empleado_registro_servicio");
 
             migrationBuilder.DropTable(
                 name: "pagos");

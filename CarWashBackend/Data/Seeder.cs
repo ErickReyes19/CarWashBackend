@@ -45,6 +45,8 @@ namespace CarWashBackend.Data
                     new Permiso { id = Guid.NewGuid().ToString(), nombre = "editar_rol", descripcion = "Permiso para editar roles", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
                     new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_servicios", descripcion = "Permiso para ver los Servicios", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
                     new Permiso { id = Guid.NewGuid().ToString(), nombre = "Editar_servicio", descripcion = "Permiso para editar los Servicios", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "Ver_registros", descripcion = "Permiso para editar los registros de servicio", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_Registro", descripcion = "Permiso para ver un registro de servicio", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
                     new Permiso { id = Guid.NewGuid().ToString(), nombre = "Crear_Servicio", descripcion = "Permiso para crear los Servicios", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true }
                 );
                 _context.SaveChanges();

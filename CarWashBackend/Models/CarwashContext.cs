@@ -95,49 +95,30 @@ public partial class CarwashContext : DbContext
                     });
         });
 
-        modelBuilder.Entity<Empleado>(entity =>
-        {
-            entity.HasKey(e => e.id).HasName("PRIMARY");
-
-            entity.HasIndex(e => e.correo, "correo1").IsUnique();
-
-            entity.Property(e => e.id).HasMaxLength(36);
-            entity.Property(e => e.activo).HasDefaultValueSql("'1'");
-            entity.Property(e => e.apellido)
-                .IsRequired()
-                .HasMaxLength(100);
-            entity.Property(e => e.correo).HasMaxLength(100);
-            entity.Property(e => e.created_at)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("datetime");
-            entity.Property(e => e.genero).HasColumnType("enum('Masculino','Femenino','Otro')");
-            entity.Property(e => e.nombre)
-                .IsRequired()
-                .HasMaxLength(100);
-            entity.Property(e => e.updated_at)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("datetime");
-
-            entity.HasMany(d => d.registro_servicios).WithMany(p => p.empleados)
-                .UsingEntity<Dictionary<string, object>>(
-                    "empleado_registro_servicio",
-                    r => r.HasOne<registro_servicio>().WithMany()
-                        .HasForeignKey("registro_servicio_id")
-                        .HasConstraintName("empleado_registro_servicio_ibfk_2"),
-                    l => l.HasOne<Empleado>().WithMany()
-                        .HasForeignKey("empleado_id")
-                        .HasConstraintName("empleado_registro_servicio_ibfk_1"),
-                    j =>
-                    {
-                        j.HasKey("empleado_id", "registro_servicio_id")
-                            .HasName("PRIMARY")
-                            .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
-                        j.ToTable("empleado_registro_servicio");
-                        j.HasIndex(new[] { "registro_servicio_id" }, "registro_servicio_id");
-                        j.IndexerProperty<string>("empleado_id").HasMaxLength(36);
-                        j.IndexerProperty<string>("registro_servicio_id").HasMaxLength(36);
-                    });
-        });
+        modelBuilder.Entity<Empleado>()
+            .HasMany(e => e.registro_servicios)
+            .WithMany(rs => rs.empleados)
+            .UsingEntity<Dictionary<string, object>>(
+                "empleado_registro_servicio",
+                r => r.HasOne<registro_servicio>()
+                      .WithMany()
+                      .HasForeignKey("registro_servicio_id")
+                      .HasConstraintName("fk_empleado_registro_servicio_registro_servicio"),
+                l => l.HasOne<Empleado>()
+                      .WithMany()
+                      .HasForeignKey("empleado_id")
+                      .HasConstraintName("fk_empleado_registro_servicio_empleado"),
+                j =>
+                {
+                    j.HasKey("empleado_id", "registro_servicio_id")
+                     .HasName("PRIMARY")
+                     .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
+                    j.ToTable("empleado_registro_servicio");
+                    j.HasIndex(new[] { "registro_servicio_id" }, "idx_registro_servicio_id");
+                    j.IndexerProperty<string>("empleado_id").HasMaxLength(36);
+                    j.IndexerProperty<string>("registro_servicio_id").HasMaxLength(36);
+                });
+        
 
         modelBuilder.Entity<EstadosServicio>(entity =>
         {

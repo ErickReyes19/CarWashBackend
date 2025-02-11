@@ -23,17 +23,14 @@ namespace TuProyecto.Controllers
         [HttpPost("multiple")]
         public async Task<IActionResult> CreateRegistroServicioMultiple([FromBody] RegistroServicioMultipleDto dto)
         {
-            // Validación básica
-            if (dto == null ||
-                string.IsNullOrEmpty(dto.ClienteId) ||
-                string.IsNullOrEmpty(dto.UsuarioId) ||
-                string.IsNullOrEmpty(dto.EstadoServicioId) ||
+            if (dto == null || string.IsNullOrEmpty(dto.ClienteId) ||
+                string.IsNullOrEmpty(dto.UsuarioId) || string.IsNullOrEmpty(dto.EstadoServicioId) ||
                 dto.Vehiculos == null || !dto.Vehiculos.Any())
             {
                 return BadRequest("Faltan datos requeridos.");
             }
 
-            // 1. Crear el registro de servicio principal (tabla: registro_servicio)
+            // 1. Crear el registro de servicio principal
             var registroServicio = new registro_servicio
             {
                 id = Guid.NewGuid().ToString(),
@@ -44,31 +41,25 @@ namespace TuProyecto.Controllers
             };
 
             _context.registro_servicios.Add(registroServicio);
-            await _context.SaveChangesAsync();
 
-            // 2. Agregar empleados a la tabla intermedia "empleado_registro_servicio"
+            // 2. Agregar empleados a la relación muchos a muchos
             if (dto.Empleados != null && dto.Empleados.Any())
             {
                 foreach (var empleadoDto in dto.Empleados)
                 {
-                    // Busca el empleado
                     var empleado = await _context.Empleados.FindAsync(empleadoDto.EmpleadoId);
                     if (empleado != null)
                     {
-                        // Crear la relación en la tabla intermedia directamente
-                        _context.Add(new
-                        {
-                            empleado_id = empleadoDto.EmpleadoId,
-                            registro_servicio_id = registroServicio.id
-                        });
+                        // Agregar el empleado a la colección de empleados en registro_servicio
+                        registroServicio.empleados.Add(empleado);
                     }
                 }
-
-                // Guardar los cambios para la relación empleados-registro_servicio
-                await _context.SaveChangesAsync();
             }
 
-            // 3. Para cada vehículo, se crea el registro en registro_servicio_vehiculo y sus detalles
+            // 3. Crear los registros de vehículos y detalles de servicio
+            var registrosVehiculo = new List<registro_servicio_vehiculo>();
+            var registrosDetalle = new List<registro_servicio_detalle>();
+
             foreach (var vehiculoDto in dto.Vehiculos)
             {
                 if (string.IsNullOrEmpty(vehiculoDto.VehiculoId) || vehiculoDto.Servicios == null || !vehiculoDto.Servicios.Any())
@@ -83,13 +74,12 @@ namespace TuProyecto.Controllers
                     vehiculo_id = vehiculoDto.VehiculoId
                 };
 
-                _context.registro_servicio_vehiculos.Add(registroServicioVehiculo);
-                await _context.SaveChangesAsync();
+                registrosVehiculo.Add(registroServicioVehiculo);
 
                 foreach (var servicio in vehiculoDto.Servicios)
                 {
                     if (string.IsNullOrEmpty(servicio.ServicioId))
-                        continue;
+                        continue; // o retorna error
 
                     var registroServicioDetalle = new registro_servicio_detalle
                     {
@@ -99,10 +89,16 @@ namespace TuProyecto.Controllers
                         precio = servicio.Precio
                     };
 
-                    _context.registro_servicio_detalles.Add(registroServicioDetalle);
-                    await _context.SaveChangesAsync();
+                    registrosDetalle.Add(registroServicioDetalle);
                 }
             }
+
+            // Añadir todo al contexto
+            _context.registro_servicio_vehiculos.AddRange(registrosVehiculo);
+            _context.registro_servicio_detalles.AddRange(registrosDetalle);
+
+            // Guardar todo de una vez
+            await _context.SaveChangesAsync();
 
             return Ok(new
             {
@@ -112,11 +108,10 @@ namespace TuProyecto.Controllers
         }
 
 
-        // GET: api/RegistroServicio/summary
         [HttpGet("summary")]
-        public async Task<IActionResult> GetAllResumen()
+        public async Task<IActionResult> GetAllResumen(DateTime? fechaDesde, DateTime? fechaHasta)
         {
-            var registros = await _context.registro_servicios
+            var registrosQuery = _context.registro_servicios
                 .Include(rs => rs.cliente)
                 .Include(rs => rs.estado_servicio)
                 .Select(rs => new RegistroServicioSummaryDto
@@ -126,11 +121,28 @@ namespace TuProyecto.Controllers
                     ClienteCorreo = rs.cliente.correo,
                     EstadoServicioNombre = rs.estado_servicio.nombre,
                     Fecha = rs.fecha
-                })
-                .ToListAsync();
+                });
+
+            // Filtro por fecha desde (comparando solo la fecha)
+            if (fechaDesde.HasValue)
+            {
+                var fechaInicio = fechaDesde.Value.Date; // Se usa Date para quitar la hora
+                registrosQuery = registrosQuery.Where(rs => rs.Fecha.Date >= fechaInicio);
+            }
+
+            // Filtro por fecha hasta (comparando solo la fecha)
+            if (fechaHasta.HasValue)
+            {
+                var fechaFin = fechaHasta.Value.Date; // Se usa Date para quitar la hora
+                registrosQuery = registrosQuery.Where(rs => rs.Fecha.Date <= fechaFin);
+            }
+
+            var registros = await registrosQuery.ToListAsync();
 
             return Ok(registros);
         }
+
+
 
         // GET: api/RegistroServicio/{id}
         [HttpGet("{id}")]
