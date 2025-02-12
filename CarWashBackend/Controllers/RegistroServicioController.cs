@@ -47,7 +47,7 @@ namespace TuProyecto.Controllers
             {
                 foreach (var empleadoDto in dto.Empleados)
                 {
-                    var empleado = await _context.Empleados.FindAsync(empleadoDto.EmpleadoId);
+                    var empleado = await _context.Empleados.FindAsync(empleadoDto);
                     if (empleado != null)
                     {
                         // Agregar el empleado a la colección de empleados en registro_servicio
