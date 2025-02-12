@@ -42,8 +42,8 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<CarwashContext>();
-    var seeder = new Seeder(context, true);
-    seeder.Seed();
+    //var seeder = new Seeder(context, true);
+    //seeder.Seed();
 }
 
 //Configure the HTTP request pipeline.
