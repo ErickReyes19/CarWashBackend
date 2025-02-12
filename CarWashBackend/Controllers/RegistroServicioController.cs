@@ -270,7 +270,7 @@ namespace TuProyecto.Controllers
                 return NotFound("Registro de servicio no encontrado.");
             }
 
-            // Mapear la entidad a un DTO de actualización para el frontend
+            // Mapear la entidad a un DTO de actualización para el fronten
             var dto = new RegistroServicioMultipleUpdateDto
             {
                 RegistroServicioId = registroServicio.id,
