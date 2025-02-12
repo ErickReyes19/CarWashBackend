@@ -1,0 +1,15 @@
+meta {
+  name: getRegistroServicioByIdEdti
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:5048/api/RegistroServicio/1b0c606c-0ceb-46a5-b046-c942534d8cdf/edit
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

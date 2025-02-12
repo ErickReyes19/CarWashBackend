@@ -101,3 +101,9 @@ public class EmpleadoDto
     public string Correo { get; set; }
 }
 
+
+
+public class RegistroServicioMultipleUpdateDto : RegistroServicioMultipleDto
+{
+    public string RegistroServicioId { get; set; }
+}
