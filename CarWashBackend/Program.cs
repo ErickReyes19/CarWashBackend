@@ -39,14 +39,14 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-//using (var scope = app.Services.CreateScope())
-//{
-//    var context = scope.ServiceProvider.GetRequiredService<CarwashContext>();
-//    var seeder = new Seeder(context);
-//    seeder.Seed();
-//}
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<CarwashContext>();
+    var seeder = new Seeder(context, true);
+    seeder.Seed();
+}
 
-// Configure the HTTP request pipeline.
+//Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

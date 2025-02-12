@@ -5,21 +5,15 @@ using System.Collections.Generic;
 
 namespace CarWashBackend.Models;
 
-public partial class Pago
+public partial class pago
 {
     public string id { get; set; }
 
     public string registro_servicio_id { get; set; }
 
-    public decimal monto { get; set; }
-
     public string metodo_pago { get; set; }
 
-    public DateTime? fecha { get; set; }
+    public decimal monto { get; set; }
 
-    public DateTime? created_at { get; set; }
-
-    public DateTime? updated_at { get; set; }
-
-    public virtual RegistroServicio registro_servicio { get; set; }
+    public virtual registro_servicio registro_servicio { get; set; }
 }

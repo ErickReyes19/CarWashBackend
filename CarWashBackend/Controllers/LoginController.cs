@@ -60,9 +60,12 @@ namespace CarWashBackend.Controllers
             // Añadir el rol y los permisos como claims
             claims.Add(new Claim("Rol", usuario.role.nombre)); // Añadir el nombre del rol
 
-            foreach (var permiso in usuario.role.permisos)
+            if (usuario.role.activo)
             {
-                claims.Add(new Claim("Permiso", permiso.nombre)); // Añadir los permisos
+                foreach (var permiso in usuario.role.permisos)
+                {
+                    claims.Add(new Claim("Permiso", permiso.nombre));
+                }
             }
 
             // Generación del token JWT

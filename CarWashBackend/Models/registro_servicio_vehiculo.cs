@@ -5,21 +5,17 @@ using System.Collections.Generic;
 
 namespace CarWashBackend.Models;
 
-public partial class Servicio
+public partial class registro_servicio_vehiculo
 {
     public string id { get; set; }
 
-    public string nombre { get; set; }
+    public string registro_servicio_id { get; set; }
 
-    public string descripcion { get; set; }
+    public string vehiculo_id { get; set; }
 
-    public decimal precio { get; set; }
-
-    public bool? activo { get; set; }
-
-    public DateTime? created_at { get; set; }
-
-    public DateTime? updated_at { get; set; }
+    public virtual registro_servicio registro_servicio { get; set; }
 
     public virtual ICollection<registro_servicio_detalle> registro_servicio_detalles { get; set; } = new List<registro_servicio_detalle>();
+
+    public virtual Vehiculo vehiculo { get; set; }
 }
