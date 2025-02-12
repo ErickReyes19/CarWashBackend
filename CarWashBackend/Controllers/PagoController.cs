@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CarWashBackend.Models;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using CarWashBackend.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarWashBackend.Controllers
 {
@@ -30,7 +28,7 @@ namespace CarWashBackend.Controllers
             if (pagos == null || !pagos.Any())
                 return NotFound("No se encontraron pagos.");
 
-            var pagosDto = pagos.Select(p => new 
+            var pagosDto = pagos.Select(p => new
             {
                 p.id,
                 p.monto,

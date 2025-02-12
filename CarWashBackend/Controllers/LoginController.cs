@@ -2,12 +2,10 @@
 using CarWashBackend.Models.NewFolder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CarWashBackend.Controllers
 {
@@ -44,7 +42,10 @@ namespace CarWashBackend.Controllers
                 return Unauthorized("Usuario o contraseña incorrectos.");
             }
 
-            if (usuario.contrasena != loginDto.Contrasena)
+            // Verificar la contraseña utilizando BCrypt
+            bool esContrasenaValida = BCrypt.Net.BCrypt.Verify(loginDto.Contrasena, usuario.contrasena);
+
+            if (!esContrasenaValida)
             {
                 return Unauthorized("Usuario o contraseña incorrectos.");
             }
@@ -72,7 +73,7 @@ namespace CarWashBackend.Controllers
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddHours(1),
+                expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: credentials
             );
 

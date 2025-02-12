@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using CarWashBackend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using CarWashBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
 [Route("api/[controller]")]
@@ -70,7 +70,8 @@ public class UsuarioController : ControllerBase
         }
     }
 
-    // Crear un nuevo usuario
+
+
     [HttpPost]
     public async Task<IActionResult> CreateUsuario(Usuario usuario)
     {
@@ -97,6 +98,9 @@ public class UsuarioController : ControllerBase
             return NotFound(new { message = "Empleado o rol no encontrados." });
         }
 
+        // Encriptar la contraseña antes de guardarla
+        usuario.contrasena = BCrypt.Net.BCrypt.HashPassword(usuario.contrasena);
+
         // Crear el usuario
         usuario.id = Guid.NewGuid().ToString();
         usuario.created_at = DateTime.UtcNow;
@@ -120,6 +124,7 @@ public class UsuarioController : ControllerBase
         return CreatedAtAction(nameof(GetUsuarioById), new { id = usuario.id }, usuarioCreatedDto);
     }
 
+
     // Obtener un usuario por ID
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUsuarioById(string id)
@@ -133,12 +138,12 @@ public class UsuarioController : ControllerBase
             return NotFound();
 
         // Crear el DTO con los datos del usuario
-        var usuarioDto = new UsuarioDTO
+        var usuarioDto = new UsuarioCreateDTO
         {
             id = usuario.id,
             usuario = usuario.usuario1,
-            empleadoNombre = usuario.empleado?.nombre,
-            roleNombre = usuario.role?.nombre,
+            empleado_id = usuario.empleado?.id,
+            role_id = usuario.role?.id,
             activo = usuario.activo,
             created_at = usuario.created_at,
             updated_at = usuario.updated_at
@@ -178,6 +183,12 @@ public class UsuarioController : ControllerBase
             return NotFound(new { message = "Empleado o rol no encontrados." });
         }
 
+        // Si la contraseña fue enviada y es nueva, encriptarla antes de guardar
+        if (!string.IsNullOrEmpty(usuario.contrasena))
+        {
+            usuario.contrasena = BCrypt.Net.BCrypt.HashPassword(usuario.contrasena);
+        }
+
         // Actualizar los datos del usuario
         existingUsuario.usuario1 = usuario.usuario1;
         existingUsuario.contrasena = usuario.contrasena;
@@ -204,6 +215,7 @@ public class UsuarioController : ControllerBase
 
         return Ok(usuarioUpdatedDto);
     }
+
 
 
 }

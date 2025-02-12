@@ -38,11 +38,17 @@ public partial class CarwashContext : DbContext
 
     public virtual DbSet<Vehiculo> Vehiculos { get; set; }
 
-    public virtual DbSet<__EFMigrationsHistory> __EFMigrationsHistories { get; set; }
+    public virtual DbSet<pago> pagos { get; set; }
+
+    public virtual DbSet<registro_servicio> registro_servicios { get; set; }
+
+    public virtual DbSet<registro_servicio_detalle> registro_servicio_detalles { get; set; }
+
+    public virtual DbSet<registro_servicio_vehiculo> registro_servicio_vehiculos { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=localhost;database=Carwash;uid=root;pwd=P@ssWord.123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.40-mysql"));
+        => optionsBuilder.UseMySql("server=localhost;database=Carwash_DB;uid=root;pwd=P@ssWord.123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.41-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -70,31 +76,53 @@ public partial class CarwashContext : DbContext
             entity.Property(e => e.updated_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
+
+            entity.HasMany(d => d.vehiculos).WithMany(p => p.clientes)
+                .UsingEntity<Dictionary<string, object>>(
+                    "cliente_vehiculo",
+                    r => r.HasOne<Vehiculo>().WithMany()
+                        .HasForeignKey("vehiculo_id")
+                        .HasConstraintName("fk_vehiculo"),
+                    l => l.HasOne<Cliente>().WithMany()
+                        .HasForeignKey("cliente_id")
+                        .HasConstraintName("fk_cliente"),
+                    j =>
+                    {
+                        j.HasKey("cliente_id", "vehiculo_id")
+                            .HasName("PRIMARY")
+                            .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
+                        j.ToTable("cliente_vehiculo");
+                        j.HasIndex(new[] { "vehiculo_id" }, "fk_vehiculo");
+                        j.HasIndex(new[] { "cliente_id", "vehiculo_id" }, "unique_cliente_vehiculo").IsUnique();
+                        j.IndexerProperty<string>("cliente_id").HasMaxLength(36);
+                        j.IndexerProperty<string>("vehiculo_id").HasMaxLength(36);
+                    });
         });
 
-        modelBuilder.Entity<Empleado>(entity =>
-        {
-            entity.HasKey(e => e.id).HasName("PRIMARY");
-
-            entity.HasIndex(e => e.correo, "correo1").IsUnique();
-
-            entity.Property(e => e.id).HasMaxLength(36);
-            entity.Property(e => e.activo).HasDefaultValueSql("'1'");
-            entity.Property(e => e.apellido)
-                .IsRequired()
-                .HasMaxLength(100);
-            entity.Property(e => e.correo).HasMaxLength(100);
-            entity.Property(e => e.created_at)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("datetime");
-            entity.Property(e => e.genero).HasColumnType("enum('Masculino','Femenino','Otro')");
-            entity.Property(e => e.nombre)
-                .IsRequired()
-                .HasMaxLength(100);
-            entity.Property(e => e.updated_at)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("datetime");
-        });
+        modelBuilder.Entity<Empleado>()
+            .HasMany(e => e.registro_servicios)
+            .WithMany(rs => rs.empleados)
+            .UsingEntity<Dictionary<string, object>>(
+                "empleado_registro_servicio",
+                r => r.HasOne<registro_servicio>()
+                      .WithMany()
+                      .HasForeignKey("registro_servicio_id")
+                      .HasConstraintName("fk_empleado_registro_servicio_registro_servicio"),
+                l => l.HasOne<Empleado>()
+                      .WithMany()
+                      .HasForeignKey("empleado_id")
+                      .HasConstraintName("fk_empleado_registro_servicio_empleado"),
+                j =>
+                {
+                    j.HasKey("empleado_id", "registro_servicio_id")
+                     .HasName("PRIMARY")
+                     .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
+                    j.ToTable("empleado_registro_servicio");
+                    j.HasIndex(new[] { "registro_servicio_id" }, "idx_registro_servicio_id");
+                    j.IndexerProperty<string>("empleado_id").HasMaxLength(36);
+                    j.IndexerProperty<string>("registro_servicio_id").HasMaxLength(36);
+                });
+        
 
         modelBuilder.Entity<EstadosServicio>(entity =>
         {
@@ -241,7 +269,6 @@ public partial class CarwashContext : DbContext
                 .IsRequired()
                 .HasMaxLength(100);
             entity.Property(e => e.updated_at)
-                .ValueGeneratedOnAddOrUpdate()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
 
@@ -328,15 +355,10 @@ public partial class CarwashContext : DbContext
         {
             entity.HasKey(e => e.id).HasName("PRIMARY");
 
-            entity.HasIndex(e => e.cliente_id, "cliente_id1");
-
             entity.HasIndex(e => e.placa, "placa").IsUnique();
 
             entity.Property(e => e.id).HasMaxLength(36);
             entity.Property(e => e.activo).HasDefaultValueSql("'1'");
-            entity.Property(e => e.cliente_id)
-                .IsRequired()
-                .HasMaxLength(36);
             entity.Property(e => e.color).HasMaxLength(30);
             entity.Property(e => e.created_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
@@ -349,22 +371,112 @@ public partial class CarwashContext : DbContext
             entity.Property(e => e.updated_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
-
-            entity.HasOne(d => d.cliente).WithMany(p => p.Vehiculos)
-                .HasForeignKey(d => d.cliente_id)
-                .HasConstraintName("Vehiculos_ibfk_1");
         });
 
-        modelBuilder.Entity<__EFMigrationsHistory>(entity =>
+        modelBuilder.Entity<pago>(entity =>
         {
-            entity.HasKey(e => e.MigrationId).HasName("PRIMARY");
+            entity.HasKey(e => e.id).HasName("PRIMARY");
 
-            entity.ToTable("__EFMigrationsHistory");
+            entity.HasIndex(e => e.registro_servicio_id, "registro_servicio_id");
 
-            entity.Property(e => e.MigrationId).HasMaxLength(150);
-            entity.Property(e => e.ProductVersion)
+            entity.Property(e => e.id).HasMaxLength(50);
+            entity.Property(e => e.metodo_pago)
                 .IsRequired()
-                .HasMaxLength(32);
+                .HasMaxLength(50);
+            entity.Property(e => e.monto).HasPrecision(10, 2);
+            entity.Property(e => e.registro_servicio_id)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasOne(d => d.registro_servicio).WithMany(p => p.pagos)
+                .HasForeignKey(d => d.registro_servicio_id)
+                .HasConstraintName("pagos_ibfk_1");
+        });
+
+        modelBuilder.Entity<registro_servicio>(entity =>
+        {
+            entity.HasKey(e => e.id).HasName("PRIMARY");
+
+            entity.ToTable("registro_servicio");
+
+            entity.HasIndex(e => e.cliente_id, "cliente_id");
+
+            entity.HasIndex(e => e.estado_servicio_id, "fk_estado_servicio");
+
+            entity.Property(e => e.id).HasMaxLength(50);
+            entity.Property(e => e.cliente_id)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.estado_servicio_id).HasMaxLength(36);
+            entity.Property(e => e.fecha)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("datetime");
+            entity.Property(e => e.usuario_id).HasMaxLength(50);
+
+            entity.HasOne(d => d.cliente).WithMany(p => p.registro_servicios)
+                .HasForeignKey(d => d.cliente_id)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("registro_servicio_ibfk_1");
+
+            entity.HasOne(d => d.estado_servicio).WithMany(p => p.registro_servicios)
+                .HasForeignKey(d => d.estado_servicio_id)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("fk_estado_servicio");
+        });
+
+        modelBuilder.Entity<registro_servicio_detalle>(entity =>
+        {
+            entity.HasKey(e => e.id).HasName("PRIMARY");
+
+            entity.ToTable("registro_servicio_detalle");
+
+            entity.HasIndex(e => e.registro_servicio_vehiculo_id, "registro_servicio_vehiculo_id");
+
+            entity.HasIndex(e => e.servicio_id, "servicio_id");
+
+            entity.Property(e => e.id).HasMaxLength(50);
+            entity.Property(e => e.precio).HasPrecision(10, 2);
+            entity.Property(e => e.registro_servicio_vehiculo_id)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.servicio_id)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasOne(d => d.registro_servicio_vehiculo).WithMany(p => p.registro_servicio_detalles)
+                .HasForeignKey(d => d.registro_servicio_vehiculo_id)
+                .HasConstraintName("registro_servicio_detalle_ibfk_1");
+
+            entity.HasOne(d => d.servicio).WithMany(p => p.registro_servicio_detalles)
+                .HasForeignKey(d => d.servicio_id)
+                .HasConstraintName("registro_servicio_detalle_ibfk_2");
+        });
+
+        modelBuilder.Entity<registro_servicio_vehiculo>(entity =>
+        {
+            entity.HasKey(e => e.id).HasName("PRIMARY");
+
+            entity.ToTable("registro_servicio_vehiculo");
+
+            entity.HasIndex(e => e.registro_servicio_id, "registro_servicio_id1");
+
+            entity.HasIndex(e => e.vehiculo_id, "vehiculo_id");
+
+            entity.Property(e => e.id).HasMaxLength(50);
+            entity.Property(e => e.registro_servicio_id)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.vehiculo_id)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasOne(d => d.registro_servicio).WithMany(p => p.registro_servicio_vehiculos)
+                .HasForeignKey(d => d.registro_servicio_id)
+                .HasConstraintName("registro_servicio_vehiculo_ibfk_1");
+
+            entity.HasOne(d => d.vehiculo).WithMany(p => p.registro_servicio_vehiculos)
+                .HasForeignKey(d => d.vehiculo_id)
+                .HasConstraintName("registro_servicio_vehiculo_ibfk_2");
         });
 
         OnModelCreatingPartial(modelBuilder);

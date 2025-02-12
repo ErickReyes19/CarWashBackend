@@ -9,8 +9,6 @@ public partial class Vehiculo
 {
     public string id { get; set; }
 
-    public string cliente_id { get; set; }
-
     public string placa { get; set; }
 
     public string modelo { get; set; }
@@ -27,5 +25,5 @@ public partial class Vehiculo
 
     public virtual ICollection<RegistroServicio> RegistroServicios { get; set; } = new List<RegistroServicio>();
 
-    public virtual Cliente cliente { get; set; }
+    public virtual ICollection<Cliente> clientes { get; set; } = new List<Cliente>();
 }
