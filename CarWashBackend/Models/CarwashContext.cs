@@ -24,11 +24,7 @@ public partial class CarwashContext : DbContext
 
     public virtual DbSet<EstadosServicio> EstadosServicios { get; set; }
 
-    public virtual DbSet<Pago> Pagos { get; set; }
-
     public virtual DbSet<Permiso> Permisos { get; set; }
-
-    public virtual DbSet<RegistroServicio> RegistroServicios { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
 
@@ -142,35 +138,6 @@ public partial class CarwashContext : DbContext
                 .HasColumnType("datetime");
         });
 
-        modelBuilder.Entity<Pago>(entity =>
-        {
-            entity.HasKey(e => e.id).HasName("PRIMARY");
-
-            entity.HasIndex(e => e.registro_servicio_id, "registro_servicio_id");
-
-            entity.Property(e => e.id).HasMaxLength(36);
-            entity.Property(e => e.created_at)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("datetime");
-            entity.Property(e => e.fecha)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("datetime");
-            entity.Property(e => e.metodo_pago)
-                .IsRequired()
-                .HasColumnType("enum('Efectivo','Tarjeta','Transferencia')");
-            entity.Property(e => e.monto).HasPrecision(10, 2);
-            entity.Property(e => e.registro_servicio_id)
-                .IsRequired()
-                .HasMaxLength(36);
-            entity.Property(e => e.updated_at)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("datetime");
-
-            entity.HasOne(d => d.registro_servicio).WithMany(p => p.Pagos)
-                .HasForeignKey(d => d.registro_servicio_id)
-                .HasConstraintName("Pagos_ibfk_1");
-        });
-
         modelBuilder.Entity<Permiso>(entity =>
         {
             entity.HasKey(e => e.id).HasName("PRIMARY");
@@ -189,68 +156,6 @@ public partial class CarwashContext : DbContext
             entity.Property(e => e.updated_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
-        });
-
-        modelBuilder.Entity<RegistroServicio>(entity =>
-        {
-            entity.HasKey(e => e.id).HasName("PRIMARY");
-
-            entity.HasIndex(e => e.cliente_id, "cliente_id");
-
-            entity.HasIndex(e => e.estado_id, "estado_id");
-
-            entity.HasIndex(e => e.servicio_id, "servicio_id");
-
-            entity.HasIndex(e => e.usuario_id, "usuario_id");
-
-            entity.HasIndex(e => e.vehiculo_id, "vehiculo_id");
-
-            entity.Property(e => e.id).HasMaxLength(36);
-            entity.Property(e => e.cliente_id)
-                .IsRequired()
-                .HasMaxLength(36);
-            entity.Property(e => e.created_at)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("datetime");
-            entity.Property(e => e.estado_id)
-                .IsRequired()
-                .HasMaxLength(36);
-            entity.Property(e => e.fecha)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("datetime");
-            entity.Property(e => e.observaciones).HasColumnType("text");
-            entity.Property(e => e.servicio_id)
-                .IsRequired()
-                .HasMaxLength(36);
-            entity.Property(e => e.updated_at)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("datetime");
-            entity.Property(e => e.usuario_id)
-                .IsRequired()
-                .HasMaxLength(36);
-            entity.Property(e => e.vehiculo_id)
-                .IsRequired()
-                .HasMaxLength(36);
-
-            entity.HasOne(d => d.cliente).WithMany(p => p.RegistroServicios)
-                .HasForeignKey(d => d.cliente_id)
-                .HasConstraintName("RegistroServicios_ibfk_1");
-
-            entity.HasOne(d => d.estado).WithMany(p => p.RegistroServicios)
-                .HasForeignKey(d => d.estado_id)
-                .HasConstraintName("RegistroServicios_ibfk_5");
-
-            entity.HasOne(d => d.servicio).WithMany(p => p.RegistroServicios)
-                .HasForeignKey(d => d.servicio_id)
-                .HasConstraintName("RegistroServicios_ibfk_3");
-
-            entity.HasOne(d => d.usuario).WithMany(p => p.RegistroServicios)
-                .HasForeignKey(d => d.usuario_id)
-                .HasConstraintName("RegistroServicios_ibfk_4");
-
-            entity.HasOne(d => d.vehiculo).WithMany(p => p.RegistroServicios)
-                .HasForeignKey(d => d.vehiculo_id)
-                .HasConstraintName("RegistroServicios_ibfk_2");
         });
 
         modelBuilder.Entity<Role>(entity =>
