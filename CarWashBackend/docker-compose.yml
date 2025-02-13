@@ -38,6 +38,7 @@ services:
     command: ["dotnet", "ef", "database", "update"]
     depends_on:
       - mysql
+    entrypoint: ["sh", "-c", "dotnet ef database update"]
     restart: "no"  # No es necesario reiniciar el contenedor de migración
 
 volumes:
