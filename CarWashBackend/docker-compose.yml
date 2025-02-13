@@ -23,6 +23,12 @@ services:
       - "3306:3306"
     volumes:
       - carwash_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--host=localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
 
   migrate:
     image: mcr.microsoft.com/dotnet/aspnet:8.0
