@@ -1,6 +1,18 @@
 ﻿version: '3.8'
 
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - DB_CONNECTION_STRING=Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123
+    depends_on:
+      - mysql
+    ports:
+      - "5000:80"
+
   mysql:
     image: mysql:8.0
     container_name: mysql_carwash
@@ -11,6 +23,16 @@ services:
       - "3306:3306"
     volumes:
       - carwash_db_data:/var/lib/mysql
+
+  migrate:
+    image: mcr.microsoft.com/dotnet/aspnet:8.0
+    environment:
+      - DB_CONNECTION_STRING=Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123
+    command: ["dotnet", "ef", "database", "update"] # Comando para ejecutar las migraciones
+    depends_on:
+      - mysql
+    entrypoint: ["sh", "-c", "dotnet ef database update"]
+    restart: "no"  # No es necesario reiniciar el contenedor de migración
 
 volumes:
   carwash_db_data:
