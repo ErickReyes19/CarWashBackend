@@ -1,36 +1,22 @@
-# Usar la imagen base de .NET SDK 8 para la construcción
+
+
+# Esta fase se usa para compilar el proyecto de servicio
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-
-# Establecer el directorio de trabajo
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-
-# Copiar el archivo .csproj y restaurar dependencias
 COPY ["CarWashBackend/CarWashBackend.csproj", "CarWashBackend/"]
-RUN dotnet restore "CarWashBackend/CarWashBackend.csproj"
-
-# Copiar el resto de los archivos del proyecto
+RUN dotnet restore "./CarWashBackend/CarWashBackend.csproj"
 COPY . .
-
-# Establecer el directorio de trabajo en la carpeta donde está el proyecto
 WORKDIR "/src/CarWashBackend"
+RUN dotnet build "./CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Construir el proyecto en modo Release
-RUN dotnet build "CarWashBackend.csproj" -c Release -o /app/build
+# Esta fase se usa para publicar el proyecto de servicio que se copiarÃ¡ en la fase final.
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Publicar la aplicación en modo Release
-RUN dotnet publish "CarWashBackend.csproj" -c Release -o /app/publish
-
-# Establecer la imagen base para el runtime (también con .NET 8)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-
-# Establecer el directorio de trabajo para la aplicación publicada
+# Esta fase se usa en producciÃ³n o cuando se ejecuta desde VS en modo normal (valor predeterminado cuando no se usa la configuraciÃ³n de depuraciÃ³n)
+FROM base AS final
 WORKDIR /app
-
-# Exponer el puerto 80 para la aplicación
-EXPOSE 80
-
-# Copiar los archivos publicados desde la etapa de build
-COPY --from=build /app/publish .
-
-# Establecer el comando por defecto para ejecutar la aplicación
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "CarWashBackend.dll"]
