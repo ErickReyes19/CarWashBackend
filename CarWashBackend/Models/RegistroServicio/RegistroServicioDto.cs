@@ -107,3 +107,10 @@ public class RegistroServicioMultipleUpdateDto : RegistroServicioMultipleDto
 {
     public string RegistroServicioId { get; set; }
 }
+
+
+public class EstadoServicioUpdateDto
+{
+    public string RegistroServicioId { get; set; }
+    public string EstadoServicioId { get; set; }
+}

@@ -137,7 +137,6 @@ namespace TuProyecto.Controllers
             registroServicio.cliente_id = dto.ClienteId;
             registroServicio.estado_servicio_id = dto.EstadoServicioId;
             registroServicio.usuario_id = dto.UsuarioId;
-            registroServicio.fecha = DateTime.UtcNow; // Puedes optar por conservar la fecha original si lo prefieres
 
             // Actualizamos la relación muchos a muchos de empleados:
             // Limpiamos la relación actual y agregamos los nuevos empleados
@@ -216,6 +215,34 @@ namespace TuProyecto.Controllers
 
 
 
+        [HttpPut("actualizar-estado")]
+        public async Task<IActionResult> UpdateEstadoRegistroServicio([FromBody] EstadoServicioUpdateDto dto)
+        {
+            if (dto == null || string.IsNullOrEmpty(dto.RegistroServicioId) || string.IsNullOrEmpty(dto.EstadoServicioId))
+            {
+                return BadRequest("Faltan datos requeridos.");
+            }
+
+            var registroServicio = await _context.registro_servicios
+                .FirstOrDefaultAsync(rs => rs.id == dto.RegistroServicioId);
+
+            if (registroServicio == null)
+            {
+                return NotFound("Registro de servicio no encontrado.");
+            }
+
+            registroServicio.estado_servicio_id = dto.EstadoServicioId;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                mensaje = "Estado del registro de servicio actualizado correctamente",
+                registroServicioId = registroServicio.id
+            });
+        }
+
+
 
 
 
@@ -253,6 +280,7 @@ namespace TuProyecto.Controllers
 
             return Ok(registros);
         }
+         
 
         [HttpGet("{id}/edit")]
         public async Task<IActionResult> GetRegistroServicioForEdit(string id)

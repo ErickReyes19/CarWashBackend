@@ -1,0 +1,51 @@
+meta {
+  name: putEstadoServicio
+  type: http
+  seq: 7
+}
+
+put {
+  url: http://localhost:5048/api/RegistroServicio/multiple
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "RegistroServicioId":"1b0c606c-0ceb-46a5-b046-c942534d8cdf",
+    "clienteId": "98114417-4262-4e70-adad-24a6fb04f6b4",
+    "estadoServicioId": "673dc2c7-847a-4084-8816-85306a306e46",
+    "UsuarioId": "580ee504-b3b8-4863-9977-f02acd7be394",
+    "Empleados": [
+      "089bfa48-0b79-4b8a-9548-a2bab96a1fe2"
+    ],
+    "vehiculos": [
+      {
+        "vehiculoId": "24c3e81d-5ef7-4957-a109-5f04c5e652d3",
+        "servicios": [
+          {
+            "servicioId": "03534ed4-28a8-4695-9ba1-29dc3adc29da",
+            "precio": 300
+          },
+          {
+            "servicioId": "9c5d36a7-354e-4db5-bb40-b77852154900",
+            "precio": 150
+          }
+        ]
+      },
+      {
+        "vehiculoId": "42d685c0-cea8-41f1-a750-b637f9bfac06",
+        "servicios": [
+          {
+            "servicioId": "9c5d36a7-354e-4db5-bb40-b77852154900",
+            "precio": 340
+          }
+        ]
+      }
+    ]
+  }
+}
