@@ -20,6 +20,9 @@ RUN dotnet build "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/build
 FROM build AS publish
 RUN dotnet publish "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
+# Verificar el contenido de /app/publish para asegurarse de que la DLL está allí
+RUN ls -l /app/publish
+
 # Establecer la imagen base para el runtime (también con .NET 8)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
