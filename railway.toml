@@ -3,6 +3,6 @@ builder = "dockerfile"
 dockerfilePath = "./CarWashBackend/Dockerfile"
 
 [deploy]
-startCommand = "./CarWashBackend"
+startCommand = "dotnet CarWashBackend.dll"
 restartpolicyType = "always"
 healthcheckPath = "/health"
