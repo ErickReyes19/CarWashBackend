@@ -21,6 +21,9 @@ RUN dotnet publish "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publi
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
+# Instalar el cliente MySQL para que pueda usarse para la espera
+RUN apt-get update && apt-get install -y mysql-client
+
 # Copiar los archivos publicados desde la etapa de publicación
 COPY --from=publish /app/publish .
 
