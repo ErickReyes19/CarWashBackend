@@ -27,14 +27,14 @@ services:
       test: ["CMD", "mysqladmin", "ping", "--host=localhost"]
       interval: 10s
       retries: 5
-      start_period: 30s
+      start_period: 60s
       timeout: 5s
 
   migrate:
-    image: mcr.microsoft.com/dotnet/aspnet:8.0
+    image: mcr.microsoft.com/dotnet/sdk:8.0
     environment:
       - DB_CONNECTION_STRING=Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123
-    command: ["dotnet", "ef", "database", "update"] # Comando para ejecutar las migraciones
+    command: ["dotnet", "ef", "database", "update"]
     depends_on:
       - mysql
     entrypoint: ["sh", "-c", "dotnet ef database update"]
