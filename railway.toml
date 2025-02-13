@@ -1,3 +1,8 @@
 [build]
 builder = "dockerfile"
 dockerfilePath = "./CarWashBackend/Dockerfile"
+
+[deploy]
+startCommand = "./CarWashBackend"
+restartpolicyType = "always"
+healthcheckPath = "/health"
