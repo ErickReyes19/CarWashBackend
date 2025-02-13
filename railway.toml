@@ -1,8 +1,8 @@
 [build]
 builder = "dockerfile"
-dockerfilePath = "./CarWashBackend/Dockerfile"
+dockerfilePath = "./CarWashBackend/Dockerfile"  # Este es opcional si se usa docker-compose
 
 [deploy]
-startCommand = "dotnet CarWashBackend.dll"
+startCommand = "docker-compose up --build"  # Usa docker-compose para desplegar
 restartpolicyType = "always"
 healthcheckPath = "/health"

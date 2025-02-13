@@ -20,9 +20,6 @@ RUN dotnet build "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/build
 FROM build AS publish
 RUN dotnet publish "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Verificar el contenido de /app/publish para asegurarse de que la DLL está allí
-RUN ls -l /app/publish
-
 # Establecer la imagen base para el runtime (también con .NET 8)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
@@ -35,3 +32,10 @@ EXPOSE 80
 
 # Establecer el comando por defecto para ejecutar la aplicación
 ENTRYPOINT ["dotnet", "CarWashBackend.dll"]
+
+# Eliminar archivos innecesarios y optimizar la construcción
+# Usar .dockerignore para excluir archivos innecesarios (ver la sección siguiente)
+
+# Comando adicional para verificar contenido, puedes eliminarlo para producción
+# RUN ls -l /app/publish
+
