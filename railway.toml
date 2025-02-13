@@ -1,6 +1,6 @@
 [build]
 builder = "dockerfile"
-dockerfilePath = "./CarWashBackend/dockerfile"
+dockerfilePath = "./CarWashBackend/Dockerfile"
 
 [deploy]
 startCommand = "./CarWashBackend"
