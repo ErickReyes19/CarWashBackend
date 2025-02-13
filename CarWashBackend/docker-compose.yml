@@ -12,6 +12,7 @@ services:
       - mysql
     ports:
       - "5000:80"
+    entrypoint: ["sh", "-c", "until mysql -h mysql -u root -p$MYSQL_ROOT_PASSWORD -e 'select 1'; do echo 'Waiting for MySQL...'; sleep 2; done; dotnet CarWashBackend.dll"]
 
   mysql:
     image: mysql:8.0
