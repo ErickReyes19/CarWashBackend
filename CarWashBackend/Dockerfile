@@ -21,15 +21,8 @@ RUN dotnet publish "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publi
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
-# Instalar dependencias, wget, y MySQL client desde otro repositorio
-RUN apt-get update && apt-get install -y \
-    gnupg \
-    wget \
-    lsb-release && \
-    wget https://dev.mysql.com/get/mysql-apt-config_0.8.17-1_all.deb && \
-    dpkg -i mysql-apt-config_0.8.17-1_all.deb && \
-    apt-get update && \
-    apt-get install -y mysql-client
+# Instalar el cliente MySQL para que pueda usarse para la espera
+RUN apt-get update && apt-get install -y mysql-client
 
 # Copiar los archivos publicados desde la etapa de publicación
 COPY --from=publish /app/publish .
