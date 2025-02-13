@@ -4,14 +4,12 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Copiar el archivo .csproj y restaurar dependencias
-COPY ["CarWashBackend/CarWashBackend.csproj", "CarWashBackend/"]
-RUN dotnet restore "CarWashBackend/CarWashBackend.csproj"
+COPY ["CarWashBackend/CarWashBackend/CarWashBackend.csproj", "CarWashBackend/"]
+WORKDIR "/src/CarWashBackend"
+RUN dotnet restore "CarWashBackend.csproj"
 
 # Copiar el resto de los archivos del proyecto
-COPY . .
-
-# Establecer el directorio de trabajo en la carpeta donde está el proyecto
-WORKDIR "/src/CarWashBackend"
+COPY CarWashBackend/ CarWashBackend/
 
 # Construir el proyecto en modo Release
 RUN dotnet build "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/build
@@ -32,10 +30,3 @@ EXPOSE 80
 
 # Establecer el comando por defecto para ejecutar la aplicación
 ENTRYPOINT ["dotnet", "CarWashBackend.dll"]
-
-# Eliminar archivos innecesarios y optimizar la construcción
-# Usar .dockerignore para excluir archivos innecesarios (ver la sección siguiente)
-
-# Comando adicional para verificar contenido, puedes eliminarlo para producción
-# RUN ls -l /app/publish
-
