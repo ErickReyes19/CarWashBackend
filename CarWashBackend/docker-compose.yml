@@ -35,9 +35,7 @@ services:
         condition: service_healthy
     command: >
       sh -c "echo 'Esperando a que MySQL esté disponible...';
-             until mysql -h mysql_db -u root -p$MYSQL_PASSWORD -e 'SELECT 1'; do
-               sleep 1;
-             done;
+             while ! nc -z mysql_db 3306; do sleep 1; done;
              echo 'MySQL está listo';
              dotnet CarWashBackend.dll"
     ports:
@@ -45,6 +43,3 @@ services:
     networks:
       - carwash-network
 
-networks:
-  carwash-network:
-    driver: bridge
