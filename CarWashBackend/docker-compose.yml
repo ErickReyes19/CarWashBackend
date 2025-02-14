@@ -1,21 +1,6 @@
 ﻿version: '3.8'
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "80:80"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - carwash-network
-
   mysql:
     image: mysql:8.0
     environment:
@@ -28,6 +13,41 @@ services:
       interval: 10s
       retries: 5
       start_period: 10s
+    networks:
+      - carwash-network
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: >
+      sh -c "echo 'Esperando a que MySQL esté disponible...';
+             while ! bash -c 'echo > /dev/tcp/mysql/3306' 2>/dev/null; do sleep 1; done;
+             echo 'MySQL está listo';
+             dotnet ef database update --no-build --project CarWashBackend.csproj"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - carwash-network
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: "dotnet CarWashBackend.dll"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "80:80"
     networks:
       - carwash-network
 
