@@ -15,12 +15,16 @@ RUN dotnet build "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/build
 # Publicar la aplicación
 RUN dotnet publish "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Etapa final: Imagen optimizada (solo runtime)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# Etapa final (usa SDK en lugar de solo runtime)
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
 WORKDIR /app
 
 # Copiar los archivos publicados
 COPY --from=build /app/publish .
+
+# Instalar herramientas de EF Core
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
 
 # Copiar el script para esperar MySQL
 COPY wait-for-it.sh /usr/local/bin/wait-for-it
