@@ -33,8 +33,11 @@ ENV PATH="$PATH:/root/.dotnet/tools"
 # Instalar las herramientas de EF en la etapa final
 RUN dotnet tool install --global dotnet-ef
 
+# Establecer el directorio de trabajo en el directorio correcto para las migraciones
+WORKDIR /src
+
 # Ejecutar las migraciones de la base de datos antes de iniciar la aplicación
-RUN dotnet ef database update --connection "Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123"
+RUN dotnet ef database update --project CarWashBackend.csproj --connection "Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123"
 
 # Exponer el puerto 80 para la aplicación
 EXPOSE 80
