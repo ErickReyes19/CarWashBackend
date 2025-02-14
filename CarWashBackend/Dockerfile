@@ -14,8 +14,8 @@ RUN dotnet publish "CarWashBackend.csproj" -c Release -o /app/publish /p:UseAppH
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
-# Instalar netcat (nc) para la comprobación de disponibilidad de MySQL
-RUN apt-get update && apt-get install -y netcat
+# Instalar netcat-openbsd para la comprobación de disponibilidad de MySQL
+RUN apt-get update && apt-get install -y netcat-openbsd
 
 # Copia la aplicación publicada
 COPY --from=build /app/publish .
