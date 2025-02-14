@@ -27,6 +27,9 @@ WORKDIR /app
 # Copiar los archivos publicados desde la etapa de publicación
 COPY --from=publish /app/publish .
 
+# Establecer el entorno de PATH para que el dotnet-ef sea accesible
+ENV PATH="$PATH:/root/.dotnet/tools"
+
 # Instalar las herramientas de EF en la etapa final
 RUN dotnet tool install --global dotnet-ef
 
