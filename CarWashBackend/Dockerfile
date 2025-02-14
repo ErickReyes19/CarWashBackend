@@ -27,20 +27,19 @@ WORKDIR /app
 # Copiar los archivos publicados desde la etapa de publicación
 COPY --from=publish /app/publish .
 
-# Establecer el entorno de PATH para que el dotnet-ef sea accesible
-ENV PATH="$PATH:/root/.dotnet/tools"
-
 # Instalar las herramientas de EF en la etapa final
 RUN dotnet tool install --global dotnet-ef
 
-# Establecer el directorio de trabajo en el directorio correcto para las migraciones
-WORKDIR /src
+# Establecer el entorno de PATH para que el dotnet-ef sea accesible
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+# Copiar el archivo .csproj desde la etapa de build
+COPY --from=build /src/CarWashBackend.csproj /app/CarWashBackend.csproj
+
+# Establecer el directorio de trabajo donde se encuentra el archivo .csproj
+WORKDIR /app
 
 # Ejecutar las migraciones de la base de datos antes de iniciar la aplicación
-RUN dotnet ef database update --project CarWashBackend.csproj --connection "Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123"
+RUN dotnet ef database update --project /app/CarWashBackend.csproj --connection "Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123"
 
-# Exponer el puerto 80 para la aplicación
-EXPOSE 80
-
-# Establecer el comando por defecto para ejecutar la aplicación
-ENTRYPOINT ["dotnet", "CarWashBackend.dll"]
+# Expo
