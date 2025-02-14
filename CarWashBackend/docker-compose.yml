@@ -11,7 +11,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
+    entrypoint: ["sh", "-c", "dotnet ef database update && dotnet MyApi.dll"]
     networks:
       - carwash-network
 
@@ -22,6 +24,11 @@ services:
       MYSQL_DATABASE: Carwash_DB
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
     networks:
       - carwash-network
 
