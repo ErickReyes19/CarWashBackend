@@ -4,7 +4,8 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Copiar solo archivos de proyecto y restaurar dependencias
-COPY ["CarWashBackend/CarWashBackend.csproj", "CarWashBackend/"]
+COPY CarWashBackend.csproj .
+
 RUN dotnet restore "CarWashBackend/CarWashBackend.csproj"
 
 # Copiar el resto de los archivos
