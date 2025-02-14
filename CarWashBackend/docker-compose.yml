@@ -39,7 +39,7 @@ services:
              echo 'MySQL está listo';
              dotnet CarWashBackend.dll"
     ports:
-      - "80:80"
+        - "8081:80"  # Esto expone el puerto 80 dentro del contenedor al puerto 8081 de tu host
     networks:
       - carwash-network
 
