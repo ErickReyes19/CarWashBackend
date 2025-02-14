@@ -10,19 +10,15 @@ RUN dotnet restore "CarWashBackend.csproj"
 COPY . .
 RUN dotnet publish "CarWashBackend.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Etapa final: Usamos el SDK para tener acceso a dotnet-ef
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
+# Etapa final: Imagen ligera de ASP.NET para producción
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
-# Copia la aplicación publicada y el archivo .csproj (necesario para migraciones)
+# Copia la aplicación publicada
 COPY --from=build /app/publish .
-COPY --from=build /src/CarWashBackend.csproj .
 
-# Instala la herramienta global dotnet-ef
-RUN dotnet tool install --global dotnet-ef
-ENV PATH="${PATH}:/root/.dotnet/tools"
-
+# Expone el puerto 80 (puedes cambiarlo si es necesario)
 EXPOSE 80
 
-# Comando por defecto (se usará en el servicio "app")
+# Comando por defecto para ejecutar la aplicación
 CMD ["dotnet", "CarWashBackend.dll"]

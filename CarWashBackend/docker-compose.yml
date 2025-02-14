@@ -3,6 +3,8 @@
 services:
   mysql:
     image: mysql:8.0
+    container_name: mysql_db
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: P@ssWord.123
       MYSQL_DATABASE: Carwash_DB
@@ -16,33 +18,15 @@ services:
     networks:
       - carwash-network
 
-  migrate:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: >
-      sh -c "echo 'Esperando a que MySQL esté disponible...';
-             while ! bash -c 'echo > /dev/tcp/mysql/3306' 2>/dev/null; do sleep 1; done;
-             echo 'MySQL está listo';
-             dotnet ef database update --no-build --project CarWashBackend.csproj"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - carwash-network
-    restart: "no"
-
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    command: "dotnet CarWashBackend.dll"
+    container_name: carwash_api
+    restart: always
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123
+      - ConnectionStrings__DefaultConnection=Server=mysql_db;Database=Carwash_DB;User=root;Password=P@ssWord.123
     depends_on:
       mysql:
         condition: service_healthy
