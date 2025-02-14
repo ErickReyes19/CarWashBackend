@@ -1,52 +1,30 @@
-# Usar la imagen base de .NET SDK 8 para la construcción
+# Consulte https://aka.ms/customizecontainer para aprender a personalizar su contenedor de depuración y cómo Visual Studio usa este Dockerfile para compilar sus imágenes para una depuración más rápida.
+
+# Esta fase se usa cuando se ejecuta desde VS en modo rápido (valor predeterminado para la configuración de depuración)
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER $APP_UID
+WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
+
+
+# Esta fase se usa para compilar el proyecto de servicio
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-
-# Copiar el archivo .csproj y restaurar dependencias
-COPY CarWashBackend.csproj .
-RUN dotnet restore "CarWashBackend.csproj"
-
-# Copiar el resto del código fuente
+COPY ["CarWashBackend/CarWashBackend.csproj", "CarWashBackend/"]
+RUN dotnet restore "./CarWashBackend/CarWashBackend.csproj"
 COPY . .
+WORKDIR "/src/CarWashBackend"
+RUN dotnet build "./CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Establecer el directorio de trabajo en la carpeta del proyecto
-WORKDIR "/src"
-
-# Construir el proyecto en modo Release
-RUN dotnet build "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
-# Publicar la aplicación en modo Release
+# Esta fase se usa para publicar el proyecto de servicio que se copiará en la fase final.
 FROM build AS publish
-RUN dotnet publish "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Usar la imagen de SDK de .NET en lugar de solo el runtime
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
+# Esta fase se usa en producción o cuando se ejecuta desde VS en modo normal (valor predeterminado cuando no se usa la configuración de depuración)
+FROM base AS final
 WORKDIR /app
-
-# Copiar los archivos publicados desde la etapa de publicación
 COPY --from=publish /app/publish .
-
-# Instalar las herramientas de EF en la etapa final
-RUN dotnet tool install --global dotnet-ef
-
-# Establecer el entorno de PATH para que el dotnet-ef sea accesible
-ENV PATH="$PATH:/root/.dotnet/tools"
-
-# Copiar el archivo .csproj desde la etapa de build
-COPY --from=build /src/CarWashBackend.csproj /app/CarWashBackend.csproj
-
-# Establecer el directorio de trabajo donde se encuentra el archivo .csproj
-WORKDIR /app
-
-# Ejecutar build para ver errores antes de ejecutar las migraciones
-RUN dotnet build --configuration Release
-
-# Ejecutar las migraciones de la base de datos antes de iniciar la aplicación
-RUN dotnet ef database update --project /app/CarWashBackend.csproj --connection "Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123"
-
-# Exponer el puerto 80 para la aplicación
-EXPOSE 80
-
-# Establecer el comando por defecto para ejecutar la aplicación
 ENTRYPOINT ["dotnet", "CarWashBackend.dll"]
