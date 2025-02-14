@@ -30,6 +30,7 @@ services:
       - MYSQL_DATABASE=Carwash_DB
       - MYSQL_USER=root
       - MYSQL_PASSWORD=P@ssWord.123
+      - PORT=80  # Asegúrate de añadir la variable PORT aquí
     depends_on:
       mysql:
         condition: service_healthy
@@ -39,7 +40,8 @@ services:
              echo 'MySQL está listo';
              dotnet CarWashBackend.dll"
     ports:
-        - "8081:80"  # Esto expone el puerto 80 dentro del contenedor al puerto 8081 de tu host
+      - "8081:80"
+
     networks:
       - carwash-network
 
