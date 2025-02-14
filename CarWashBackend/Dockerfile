@@ -22,6 +22,9 @@ WORKDIR /app
 # Copiar los archivos publicados
 COPY --from=build /app/publish .
 
+# Copiar el archivo .csproj desde la etapa de build para que esté disponible en el contenedor
+COPY --from=build /src/CarWashBackend.csproj /app/CarWashBackend.csproj
+
 # Instalar herramientas de EF Core
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"
@@ -30,7 +33,7 @@ ENV PATH="$PATH:/root/.dotnet/tools"
 COPY wait-for-it.sh /usr/local/bin/wait-for-it
 RUN chmod +x /usr/local/bin/wait-for-it
 
-# Cambiar el directorio de trabajo a la ubicación del archivo .csproj
+# Establecer el directorio de trabajo en /app
 WORKDIR /app
 
 # Exponer el puerto 80
