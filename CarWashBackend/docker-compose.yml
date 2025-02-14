@@ -9,10 +9,18 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - DB_CONNECTION_STRING=Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     ports:
       - "5000:80"
-    entrypoint: ["sh", "-c", "until mysql -h mysql -u root -p$MYSQL_ROOT_PASSWORD -e 'select 1'; do echo 'Waiting for MySQL...'; sleep 2; done; dotnet CarWashBackend.dll"]
+    entrypoint: >
+      sh -c "
+      echo 'Esperando a MySQL...';
+      until dotnet ef database update; do
+        echo 'Reintentando migración...';
+        sleep 2;
+      done;
+      exec dotnet CarWashBackend.dll"
 
   mysql:
     image: mysql:8.0
@@ -25,21 +33,11 @@ services:
     volumes:
       - carwash_db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "--host=localhost"]
+      test: ["CMD", "mysqladmin", "ping", "--host=localhost", "--user=root", "--password=P@ssWord.123"]
       interval: 10s
       retries: 5
-      start_period: 60s
+      start_period: 30s
       timeout: 5s
-
-  migrate:
-    image: mcr.microsoft.com/dotnet/sdk:8.0
-    environment:
-      - DB_CONNECTION_STRING=Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123
-    command: ["dotnet", "ef", "database", "update"]
-    depends_on:
-      - mysql
-    entrypoint: ["sh", "-c", "dotnet ef database update"]
-    restart: "no"  # No es necesario reiniciar el contenedor de migración
 
 volumes:
   carwash_db_data:
