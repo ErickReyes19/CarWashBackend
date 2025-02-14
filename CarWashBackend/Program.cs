@@ -10,9 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Cargar las variables de entorno
 builder.Configuration.AddEnvironmentVariables();
 
-// Obtener el puerto desde las variables de entorno o por defecto "8081"
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8081";
-builder.WebHost.UseUrls($"http://*:{port}");
+// Configuración de Kestrel para escuchar en el puerto 80
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(80);  // Kestrel escuchará en el puerto 80
+});
 
 // Obtener las variables de entorno para la base de datos
 var mysqlHost = Environment.GetEnvironmentVariable("MYSQL_HOST");
@@ -85,7 +87,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthentication();
-app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
