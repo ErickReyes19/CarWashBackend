@@ -8,8 +8,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: P@ssWord.123
       MYSQL_DATABASE: Carwash_DB
-      MYSQL_USER: root
-      MYSQL_PASSWORD: P@ssWord.123
     ports:
       - "3306:3306"
     healthcheck:
