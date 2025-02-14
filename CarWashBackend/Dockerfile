@@ -27,6 +27,9 @@ WORKDIR /app
 # Copiar los archivos publicados desde la etapa de publicación
 COPY --from=publish /app/publish .
 
+# Instalar las herramientas de EF
+RUN dotnet tool install --global dotnet-ef
+
 # Ejecutar las migraciones de la base de datos antes de iniciar la aplicación
 RUN dotnet ef database update --connection "Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123"
 
