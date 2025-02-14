@@ -17,7 +17,7 @@ WORKDIR /app
 # Copia la aplicación publicada
 COPY --from=build /app/publish .
 
-# Expone el puerto 80 (puedes cambiarlo si es necesario)
+# Exponer el puerto (asegúrate de que sea el puerto correcto)
 EXPOSE 80
 
 # Comando por defecto para ejecutar la aplicación

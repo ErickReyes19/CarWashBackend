@@ -37,7 +37,9 @@ services:
         condition: service_healthy
     command: >
       sh -c "echo 'Esperando a que MySQL esté disponible...';
-             while ! bash -c 'echo > /dev/tcp/mysql_db/3306' 2>/dev/null; do sleep 1; done;
+             until mysql -h mysql_db -u root -p$MYSQL_PASSWORD -e 'SELECT 1'; do
+               sleep 1;
+             done;
              echo 'MySQL está listo';
              dotnet CarWashBackend.dll"
     ports:
