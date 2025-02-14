@@ -1,43 +1,32 @@
-# Etapa de construcción
+# Etapa de construcción: compila y publica la aplicación
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copiar y restaurar dependencias
+# Copia el archivo de proyecto y restaura dependencias
 COPY ["CarWashBackend.csproj", "./"]
 RUN dotnet restore "CarWashBackend.csproj"
 
-# Copiar el código fuente y construir
+# Copia el resto del código y publica la aplicación
 COPY . .
-WORKDIR "/src"
-RUN dotnet build "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet publish "CarWashBackend.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Publicar la aplicación
-RUN dotnet publish "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-# Etapa final (usa SDK en lugar de solo runtime)
+# Etapa final: se usa el SDK para disponer de 'dotnet ef'
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
 WORKDIR /app
 
-# Copiar los archivos publicados
+# Copia la aplicación publicada y el archivo .csproj (necesario para las migraciones)
 COPY --from=build /app/publish .
+COPY --from=build /src/CarWashBackend.csproj .
 
-# Copiar el archivo .csproj desde la etapa de build para que esté disponible en el contenedor
-COPY --from=build /src/CarWashBackend.csproj /app/CarWashBackend.csproj
-
-# Instalar herramientas de EF Core
+# Instala la herramienta global 'dotnet-ef'
 RUN dotnet tool install --global dotnet-ef
-ENV PATH="$PATH:/root/.dotnet/tools"
+ENV PATH="${PATH}:/root/.dotnet/tools"
 
-# Copiar el script para esperar MySQL
-COPY wait-for-it.sh /usr/local/bin/wait-for-it
-RUN chmod +x /usr/local/bin/wait-for-it
-
-# Establecer el directorio de trabajo en /app
-WORKDIR /app
-
-# Exponer el puerto 80
+# Expone el puerto 80
 EXPOSE 80
 
-# Ejecutar migraciones y luego iniciar la app
-ENTRYPOINT ["sh", "-c", "/usr/local/bin/wait-for-it mysql && dotnet ef database update --project CarWashBackend.csproj && dotnet CarWashBackend.dll"]
+# ENTRYPOINT que:
+#  1. Espera a que MySQL esté disponible (usando bash y /dev/tcp)
+#  2. Ejecuta las migraciones (dotnet ef database update)
+#  3. Inicia la aplicación
+ENTRYPOINT ["sh", "-c", "echo 'Esperando a que MySQL esté disponible...'; while ! bash -c 'echo > /dev/tcp/mysql/3306' 2>/dev/null; do sleep 1; done; echo 'MySQL está listo'; dotnet ef database update --project CarWashBackend.csproj && dotnet CarWashBackend.dll"]
