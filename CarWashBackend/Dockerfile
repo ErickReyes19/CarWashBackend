@@ -20,14 +20,14 @@ RUN dotnet build "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/build
 FROM build AS publish
 RUN dotnet publish "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Establecer la imagen base para el runtime (también con .NET 8)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# Usar la imagen de SDK de .NET en lugar de solo el runtime
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
 WORKDIR /app
 
 # Copiar los archivos publicados desde la etapa de publicación
 COPY --from=publish /app/publish .
 
-# Instalar las herramientas de EF
+# Instalar las herramientas de EF en la etapa final
 RUN dotnet tool install --global dotnet-ef
 
 # Ejecutar las migraciones de la base de datos antes de iniciar la aplicación
