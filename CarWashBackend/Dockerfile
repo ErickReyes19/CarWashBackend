@@ -22,7 +22,7 @@ WORKDIR /app
 # Copiar los archivos publicados
 COPY --from=build /app/publish .
 
-# Esperar a que MySQL esté listo antes de correr migraciones
+# Copiar el script para esperar MySQL
 COPY wait-for-it.sh /usr/local/bin/wait-for-it
 RUN chmod +x /usr/local/bin/wait-for-it
 
@@ -30,4 +30,4 @@ RUN chmod +x /usr/local/bin/wait-for-it
 EXPOSE 80
 
 # Ejecutar migraciones y luego iniciar la app
-ENTRYPOINT ["sh", "-c", "wait-for-it mysql:3306 -- dotnet ef database update && dotnet CarWashBackend.dll"]
+ENTRYPOINT ["sh", "-c", "/usr/local/bin/wait-for-it mysql && dotnet ef database update && dotnet CarWashBackend.dll"]

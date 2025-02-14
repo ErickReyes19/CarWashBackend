@@ -3,9 +3,12 @@ host="$1"
 shift
 cmd="$@"
 
-until nc -z "$host" 3306; do
-  echo "Esperando a que MySQL esté disponible..."
+echo "Esperando a que MySQL esté disponible en $host:3306..."
+
+while ! timeout 1 bash -c "echo > /dev/tcp/$host/3306" 2>/dev/null; do
+  echo "MySQL no está listo, esperando..."
   sleep 2
 done
 
+echo "MySQL está listo, ejecutando el comando..."
 exec $cmd
