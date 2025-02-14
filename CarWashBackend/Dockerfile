@@ -15,15 +15,19 @@ RUN dotnet build "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/build
 # Publicar la aplicación
 RUN dotnet publish "CarWashBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Etapa final: Imagen optimizada
+# Etapa final: Imagen optimizada (solo runtime)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
-# Copiar los archivos publicados desde la etapa de build
+# Copiar los archivos publicados
 COPY --from=build /app/publish .
+
+# Esperar a que MySQL esté listo antes de correr migraciones
+COPY wait-for-it.sh /usr/local/bin/wait-for-it
+RUN chmod +x /usr/local/bin/wait-for-it
 
 # Exponer el puerto 80
 EXPOSE 80
 
-# Ejecutar migraciones antes de iniciar la app
-ENTRYPOINT ["sh", "-c", "dotnet ef database update && dotnet CarWashBackend.dll"]
+# Ejecutar migraciones y luego iniciar la app
+ENTRYPOINT ["sh", "-c", "wait-for-it mysql:3306 -- dotnet ef database update && dotnet CarWashBackend.dll"]

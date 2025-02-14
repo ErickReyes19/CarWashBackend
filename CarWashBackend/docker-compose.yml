@@ -13,7 +13,6 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    entrypoint: ["sh", "-c", "dotnet ef database update && dotnet MyApi.dll"]
     networks:
       - carwash-network
 
