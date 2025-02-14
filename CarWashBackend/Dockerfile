@@ -39,7 +39,14 @@ COPY --from=build /src/CarWashBackend.csproj /app/CarWashBackend.csproj
 # Establecer el directorio de trabajo donde se encuentra el archivo .csproj
 WORKDIR /app
 
+# Ejecutar build para ver errores antes de ejecutar las migraciones
+RUN dotnet build --configuration Release
+
 # Ejecutar las migraciones de la base de datos antes de iniciar la aplicación
 RUN dotnet ef database update --project /app/CarWashBackend.csproj --connection "Server=mysql;Database=Carwash_DB;User=root;Password=P@ssWord.123"
 
-# Expo
+# Exponer el puerto 80 para la aplicación
+EXPOSE 80
+
+# Establecer el comando por defecto para ejecutar la aplicación
+ENTRYPOINT ["dotnet", "CarWashBackend.dll"]
