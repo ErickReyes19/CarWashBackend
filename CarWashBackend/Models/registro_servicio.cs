@@ -8,15 +8,11 @@ namespace CarWashBackend.Models;
 public partial class registro_servicio
 {
     public string id { get; set; }
-
     public string cliente_id { get; set; }
-
     public string usuario_id { get; set; }
-
     public DateTime fecha { get; set; }
-
     public string estado_servicio_id { get; set; }
-
+    public decimal total { get; set; }
     public virtual Cliente cliente { get; set; }
 
     public virtual EstadosServicio estado_servicio { get; set; }

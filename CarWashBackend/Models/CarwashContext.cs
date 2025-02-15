@@ -55,6 +55,7 @@ protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 }
 
 
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
@@ -316,7 +317,10 @@ protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             entity.HasIndex(e => e.cliente_id, "cliente_id");
 
             entity.HasIndex(e => e.estado_servicio_id, "fk_estado_servicio");
-
+            entity.Property(e => e.total)
+                  .HasPrecision(10, 2) 
+                  .IsRequired()
+                  .HasDefaultValue(0); // Un valor inicial de 0
             entity.Property(e => e.id).HasMaxLength(50);
             entity.Property(e => e.cliente_id)
                 .IsRequired()
@@ -336,6 +340,8 @@ protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
                 .HasForeignKey(d => d.estado_servicio_id)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("fk_estado_servicio");
+
+
         });
 
         modelBuilder.Entity<registro_servicio_detalle>(entity =>
