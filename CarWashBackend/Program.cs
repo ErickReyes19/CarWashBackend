@@ -89,6 +89,26 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Ruta raíz que responde con un mensaje y la fecha actual en zona horaria de Honduras
+app.MapGet("/", () =>
+{
+    // Obtener la zona horaria de Honduras
+    var hondurasTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
+
+    // Obtener la hora actual UTC
+    var utcNow = DateTime.UtcNow;
+
+    // Convertir la hora UTC a la hora de Honduras
+    var hondurasTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, hondurasTimeZone);
+
+    // Responder con la hora convertida
+    return Results.Ok(new
+    {
+        message = "API CarWash levantada correctamente",
+        currentDate = hondurasTime.ToString("yyyy-MM-ddTHH:mm:ss")
+    });
+});
+
 app.MapControllers();
 
 app.Run();

@@ -56,7 +56,8 @@ namespace TuProyecto.Controllers
                 }
             }
 
-            // 3. Crear los registros de vehículos y detalles de servicio
+            // 3. Crear los registros de vehículos y detalles de servicio, y calcular el total
+            decimal totalServicio = 0;
             var registrosVehiculo = new List<registro_servicio_vehiculo>();
             var registrosDetalle = new List<registro_servicio_detalle>();
 
@@ -90,8 +91,14 @@ namespace TuProyecto.Controllers
                     };
 
                     registrosDetalle.Add(registroServicioDetalle);
+
+                    // Acumulamos el precio total
+                    totalServicio += servicio.Precio;
                 }
             }
+
+            // Establecer el total en el registro de servicio
+            registroServicio.total = totalServicio;
 
             // Añadir todo al contexto
             _context.registro_servicio_vehiculos.AddRange(registrosVehiculo);
@@ -103,9 +110,11 @@ namespace TuProyecto.Controllers
             return Ok(new
             {
                 mensaje = "Registro de servicio para múltiples vehículos creado correctamente",
-                registroServicioId = registroServicio.id
+                registroServicioId = registroServicio.id,
+                totalServicio = totalServicio // Devolver el total
             });
         }
+
 
         [HttpPut("multiple")]
         public async Task<IActionResult> UpdateRegistroServicioMultiple([FromBody] RegistroServicioMultipleUpdateDto dto)
