@@ -8,6 +8,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: P@ssWord.123
       MYSQL_DATABASE: Carwash_DB
+      TZ: America/Tegucigalpa  # Configurar la zona horaria de Honduras
     ports:
       - "3306:3306"
     volumes:
