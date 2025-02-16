@@ -10,6 +10,8 @@ services:
       MYSQL_DATABASE: Carwash_DB
     ports:
       - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql  # Persistencia de datos
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -30,7 +32,7 @@ services:
       - MYSQL_DATABASE=Carwash_DB
       - MYSQL_USER=root
       - MYSQL_PASSWORD=P@ssWord.123
-      - PORT=80  # Asegúrate de añadir la variable PORT aquí
+      - PORT=80
     depends_on:
       mysql:
         condition: service_healthy
@@ -41,10 +43,12 @@ services:
              dotnet CarWashBackend.dll"
     ports:
       - "8081:80"
-
     networks:
       - carwash-network
 
 networks:
   carwash-network:
     driver: bridge
+
+volumes:
+  mysql_data:  # Definir el volumen
