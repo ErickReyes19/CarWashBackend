@@ -24,7 +24,7 @@ var mysqlUser = Environment.GetEnvironmentVariable("MYSQL_USER");
 var mysqlPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD");
 
 // Construir la cadena de conexión asegurando que MySQL use la zona horaria de Honduras
-var connectionString = $"server={mysqlHost};database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword};default-time-zone='-06:00'";
+var connectionString = $"server={mysqlHost};database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
 
 // Configurar la zona horaria de Honduras para la API
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("es-HN");
