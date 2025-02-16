@@ -35,6 +35,9 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=P@ssWord.123
       - PORT=80
+      - TZ=America/Tegucigalpa  # Configuración de zona horaria
+    volumes:
+      - /etc/localtime:/etc/localtime:ro  # Sincroniza la zona horaria con el host
     depends_on:
       mysql:
         condition: service_healthy
