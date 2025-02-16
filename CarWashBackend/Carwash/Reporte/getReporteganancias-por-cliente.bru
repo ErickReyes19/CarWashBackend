@@ -1,0 +1,20 @@
+meta {
+  name: getReporteganancias-por-cliente
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{url}}/api/reporte/numero-servicios-dia?fechaDesde=2025-02-10&fechaHasta=2025-02-15
+  body: none
+  auth: bearer
+}
+
+params:query {
+  fechaDesde: 2025-02-10
+  fechaHasta: 2025-02-15
+}
+
+auth:bearer {
+  token: {{token}}
+}

@@ -1,0 +1,20 @@
+meta {
+  name: getReporteganancias_rango
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{url}}/api/reporte/ganancias_rango?fechaDesde=2025-02-10&fechaHasta=2025-02-15
+  body: none
+  auth: bearer
+}
+
+params:query {
+  fechaDesde: 2025-02-10
+  fechaHasta: 2025-02-15
+}
+
+auth:bearer {
+  token: {{token}}
+}
