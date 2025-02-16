@@ -9,6 +9,7 @@ services:
       MYSQL_ROOT_PASSWORD: P@ssWord.123
       MYSQL_DATABASE: Carwash_DB
       TZ: America/Tegucigalpa  # Configurar la zona horaria de Honduras
+    command: --default-time-zone='-06:00'  # Forzar UTC -6 en MySQL
     ports:
       - "3306:3306"
     volumes:
