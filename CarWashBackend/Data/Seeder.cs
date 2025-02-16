@@ -17,7 +17,7 @@ namespace CarWashBackend.Data
         }
         public void Seed()
         {
-            if (_resetData)
+            if (_resetData && !_context.Usuarios.Any()) // Solo borra si no hay usuarios
             {
                 _context.Permisos.RemoveRange(_context.Permisos);
                 _context.Roles.RemoveRange(_context.Roles);
