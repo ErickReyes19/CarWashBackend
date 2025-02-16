@@ -7,7 +7,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Cargar las variables de entorno
+// Cargar las variables de entorno (puedes dejarlo para otros valores si lo necesitas)
 builder.Configuration.AddEnvironmentVariables();
 
 // Configuración de Kestrel para escuchar en el puerto 80
@@ -16,14 +16,20 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(80);  // Kestrel escuchará en el puerto 80
 });
 
+
 // Obtener las variables de entorno para la base de datos
 var mysqlHost = Environment.GetEnvironmentVariable("MYSQL_HOST");
 var mysqlDatabase = Environment.GetEnvironmentVariable("MYSQL_DATABASE");
 var mysqlUser = Environment.GetEnvironmentVariable("MYSQL_USER");
 var mysqlPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD");
-
-// Construir el ConnectionString para MySQL
 var connectionString = $"server={mysqlHost};database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
+// Definir las credenciales de la base de datos de forma fija
+//var mysqlHost = "localhost";
+//var mysqlDatabase = "Carwash_DB";
+//var mysqlUser = "root";
+//var mysqlPassword = "P@ssWord.123";
+//var connectionString = $"server={mysqlHost};port=3306;database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
+// Construir el ConnectionString para MySQL (incluyendo el puerto 3306)
 
 // Agregar servicios al contenedor
 builder.Services.AddControllers();
@@ -32,9 +38,7 @@ builder.Services.AddSwaggerGen();
 
 // Configurar el DbContext para MySQL
 builder.Services.AddDbContext<CarwashContext>(options =>
-    options.UseMySql(
-        connectionString,
-        ServerVersion.AutoDetect(connectionString))
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
 );
 
 // Configurar autenticación JWT
@@ -94,14 +98,9 @@ app.MapGet("/", () =>
 {
     // Obtener la zona horaria de Honduras
     var hondurasTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
-
-    // Obtener la hora actual UTC
     var utcNow = DateTime.UtcNow;
-
-    // Convertir la hora UTC a la hora de Honduras
     var hondurasTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, hondurasTimeZone);
 
-    // Responder con la hora convertida
     return Results.Ok(new
     {
         message = "API CarWash levantada correctamente",
