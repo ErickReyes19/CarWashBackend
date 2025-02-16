@@ -37,7 +37,7 @@ namespace TuProyecto.Controllers
                 cliente_id = dto.ClienteId,
                 estado_servicio_id = dto.EstadoServicioId,
                 usuario_id = dto.UsuarioId,
-                fecha = DateTime.UtcNow
+                fecha = DateTime.Now
             };
 
             _context.registro_servicios.Add(registroServicio);
@@ -271,7 +271,7 @@ namespace TuProyecto.Controllers
                     Fecha = rs.fecha
                 });
 
-            // Filtro por fecha desde (comparando solo la fecha)
+            // Filtro por fecha desde (comparando solo la fecha)RegistroServicioSummaryDto
             if (fechaDesde.HasValue)
             {
                 var fechaInicio = fechaDesde.Value.Date; // Se usa Date para quitar la hora
