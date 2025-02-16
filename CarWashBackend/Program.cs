@@ -17,20 +17,32 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(80);  // Kestrel escuchará en el puerto 80
 });
 
-
 // Obtener las variables de entorno para la base de datos
 var mysqlHost = Environment.GetEnvironmentVariable("MYSQL_HOST");
 var mysqlDatabase = Environment.GetEnvironmentVariable("MYSQL_DATABASE");
 var mysqlUser = Environment.GetEnvironmentVariable("MYSQL_USER");
 var mysqlPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD");
 var connectionString = $"server={mysqlHost};database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
+
 // Definir las credenciales de la base de datos de forma fija
-//var mysqlHost = "localhost";
-//var mysqlDatabase = "Carwash_DB";
-//var mysqlUser = "root";
-//var mysqlPassword = "P@ssWord.123";
-//var connectionString = $"server={mysqlHost};port=3306;database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
+// var mysqlHost = "localhost";
+// var mysqlDatabase = "Carwash_DB";
+// var mysqlUser = "root";
+// var mysqlPassword = "P@ssWord.123";
+// var connectionString = $"server={mysqlHost};port=3306;database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
 // Construir el ConnectionString para MySQL (incluyendo el puerto 3306)
+
+// Configurar la zona horaria a Honduras
+var hondurasTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
+TimeZoneInfo.ClearCachedData(); // Limpiar caché de zona horaria por si acaso
+TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+
+Console.WriteLine($"Zona horaria del sistema: {localTimeZone.Id}");
+Console.WriteLine($"Zona horaria esperada: {hondurasTimeZone.Id}");
+
+// Configurar la cultura predeterminada
+CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("es-HN");
+CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("es-HN");
 
 // Agregar servicios al contenedor
 builder.Services.AddControllers();
@@ -41,9 +53,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<CarwashContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
 );
-
-CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("es-HN");
-CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("es-HN");
 
 // Configurar autenticación JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -101,14 +110,14 @@ app.UseAuthorization();
 app.MapGet("/", () =>
 {
     // Obtener la zona horaria de Honduras
-    var hondurasTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
     var utcNow = DateTime.UtcNow;
     var hondurasTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, hondurasTimeZone);
 
     return Results.Ok(new
     {
         message = "API CarWash levantada correctamente",
-        currentDate = hondurasTime.ToString("yyyy-MM-ddTHH:mm:ss")
+        utcDate = utcNow.ToString("yyyy-MM-ddTHH:mm:ss"),
+        localDate = hondurasTime.ToString("yyyy-MM-ddTHH:mm:ss")
     });
 });
 
