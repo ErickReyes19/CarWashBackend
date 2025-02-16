@@ -3,11 +3,12 @@ using CarWashBackend.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Cargar las variables de entorno (puedes dejarlo para otros valores si lo necesitas)
+// Cargar las variables de entorno
 builder.Configuration.AddEnvironmentVariables();
 
 // Configuración de Kestrel para escuchar en el puerto 80
@@ -16,20 +17,18 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(80);  // Kestrel escuchará en el puerto 80
 });
 
-
 // Obtener las variables de entorno para la base de datos
 var mysqlHost = Environment.GetEnvironmentVariable("MYSQL_HOST");
 var mysqlDatabase = Environment.GetEnvironmentVariable("MYSQL_DATABASE");
 var mysqlUser = Environment.GetEnvironmentVariable("MYSQL_USER");
 var mysqlPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD");
-var connectionString = $"server={mysqlHost};database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
-// Definir las credenciales de la base de datos de forma fija
-//var mysqlHost = "localhost";
-//var mysqlDatabase = "Carwash_DB";
-//var mysqlUser = "root";
-//var mysqlPassword = "P@ssWord.123";
-//var connectionString = $"server={mysqlHost};port=3306;database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
-// Construir el ConnectionString para MySQL (incluyendo el puerto 3306)
+
+// Construir la cadena de conexión asegurando que MySQL use la zona horaria de Honduras
+var connectionString = $"server={mysqlHost};database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword};default-time-zone='-06:00'";
+
+// Configurar la zona horaria de Honduras para la API
+CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("es-HN");
+CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("es-HN");
 
 // Agregar servicios al contenedor
 builder.Services.AddControllers();
@@ -96,7 +95,6 @@ app.UseAuthorization();
 // Ruta raíz que responde con un mensaje y la fecha actual en zona horaria de Honduras
 app.MapGet("/", () =>
 {
-    // Obtener la zona horaria de Honduras
     var hondurasTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
     var utcNow = DateTime.UtcNow;
     var hondurasTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, hondurasTimeZone);
