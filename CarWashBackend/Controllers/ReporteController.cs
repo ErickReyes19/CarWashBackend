@@ -78,6 +78,8 @@ public class ReporteController : ControllerBase
     //}
 
     // Número de servicios realizados por día
+
+
     [HttpGet("numero-servicios-dia")]
     public async Task<ActionResult> GetNumeroServiciosPorDia([FromQuery] DateTime? fechaDesde, [FromQuery] DateTime? fechaHasta)
     {
@@ -92,17 +94,21 @@ public class ReporteController : ControllerBase
 
             var numeroServicios = await _context.registro_servicios
                 .Where(r => r.fecha >= fechaDesdeSolo && r.fecha <= fechaHastaSolo)
-                .GroupBy(r => r.fecha.Date)  // Agrupar por fecha (sin la hora)
-                .Select(g => new
-                {
-                    fecha = g.Key.ToString("yyyy-MM-dd"),
-                    numero_servicios = g.Count()
-                })
+                .GroupJoin(
+                    _context.registro_servicio_detalles, // Unir con los detalles de servicio
+                    r => r.id, // Relacionamos por el ID del registro de servicio
+                    rsd => rsd.registro_servicio_vehiculo_id, // Relacionamos por el ID del vehículo en el detalle
+                    (r, detalles) => new
+                    {
+                        fecha = r.fecha.Date.ToString("yyyy-MM-dd"),
+                        numero_servicios = detalles.Count(), // Contamos cuántos detalles existen
+                        ganancias = detalles.Sum(d => d.precio) // Sumamos las ganancias
+                    })
                 .ToListAsync();
 
             return Ok(new
             {
-                message = "Número de servicios realizados por día",
+                message = "Número de servicios realizados por día con ganancias",
                 data = numeroServicios
             });
         }
