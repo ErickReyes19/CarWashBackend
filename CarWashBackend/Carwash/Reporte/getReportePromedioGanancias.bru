@@ -5,9 +5,14 @@ meta {
 }
 
 get {
-  url: {{url}}/api/reporte/promedio-ganancias-diarias
+  url: {{url}}/api/reporte/promedio-ganancias-diarias?fechaDesde=2025-02-10&fechaHasta=2025-02-17
   body: none
   auth: bearer
+}
+
+params:query {
+  fechaDesde: 2025-02-10
+  fechaHasta: 2025-02-17
 }
 
 auth:bearer {
