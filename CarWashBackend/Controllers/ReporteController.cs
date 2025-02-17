@@ -78,58 +78,50 @@ public class ReporteController : ControllerBase
     //}
 
     // Número de servicios realizados por día
-    [HttpGet("numero-servicios-dia")]
-    public async Task<ActionResult> GetNumeroServiciosPorDia([FromQuery] DateTime? fechaDesde, [FromQuery] DateTime? fechaHasta)
+    [HttpGet("servicios-resumen")]
+    public async Task<ActionResult> GetResumenServicios([FromQuery] DateTime? fechaDesde, [FromQuery] DateTime? fechaHasta)
     {
         try
         {
             // Si no se pasan los parámetros, se usan las fechas actuales ajustadas a UTC-6
             var fechaDesdeSolo = (fechaDesde ?? DateTime.UtcNow.AddHours(-6)).Date;
-            // Ajustar fechaHasta para incluir todo el día (hasta las 23:59:59.999)
             var fechaHastaSolo = ((fechaHasta ?? DateTime.UtcNow.AddHours(-6)).Date)
                                   .AddDays(1)
                                   .AddTicks(-1);
 
-            // Consulta para obtener la lista de servicios realizados, su cantidad y las ganancias
+            // Consulta con la relación correcta
             var serviciosConDetalles = await _context.registro_servicios
-                .Where(r => r.fecha >= fechaDesdeSolo && r.fecha <= fechaHastaSolo)
-                .Join(
-                    _context.registro_servicio_detalles, // Unir con los detalles del servicio
-                    r => r.id, // Relacionamos por el ID del registro de servicio
-                    rsd => rsd.registro_servicio_vehiculo_id, // Relacionamos por el ID del vehículo en el detalle
-                    (r, rsd) => new
-                    {
-                        r.fecha,
-                        rsd.servicio_id,
-                        rsd.precio
-                    })
-                .Join(
-                    _context.Servicios, // Unir con la tabla de Servicios para obtener el nombre
-                    rsd => rsd.servicio_id, // Relacionamos por servicio_id
-                    s => s.id, // Relacionamos por id del servicio
-                    (rsd, s) => new
-                    {
-                        nombreServicio = s.nombre, // Obtener nombre del servicio
-                        precio = rsd.precio // Obtener el precio del detalle
-                    })
-                .GroupBy(s => s.nombreServicio) // Agrupar por nombre de servicio
+                .Where(rs => rs.fecha >= fechaDesdeSolo && rs.fecha <= fechaHastaSolo)
+                .Join(_context.registro_servicio_vehiculos,
+                    rs => rs.id,
+                    rsv => rsv.registro_servicio_id,
+                    (rs, rsv) => new { rsv.id }) // Obtener solo ID del registro_servicio_vehiculo
+                .Join(_context.registro_servicio_detalles,
+                    rsv => rsv.id,
+                    rsd => rsd.registro_servicio_vehiculo_id,
+                    (rsv, rsd) => new { rsd.servicio_id, rsd.precio }) // Obtener servicio y precio del detalle
+                .Join(_context.Servicios,
+                    rsd => rsd.servicio_id,
+                    s => s.id,
+                    (rsd, s) => new { s.nombre, rsd.precio }) // Obtener nombre del servicio
+                .GroupBy(s => s.nombre)
                 .Select(g => new
                 {
                     nombreServicio = g.Key,
-                    cantidad = g.Count(), // Contamos las veces que se ha realizado el servicio
-                    ganancias = g.Sum(x => x.precio) // Sumamos las ganancias por servicio
+                    cantidad = g.Count(),
+                    ganancias = g.Sum(x => x.precio) // SUMAMOS EL PRECIO DEL DETALLE
                 })
                 .ToListAsync();
 
             return Ok(new
             {
-                message = "Número de servicios realizados con ganancias",
+                message = "Resumen de servicios realizados",
                 data = serviciosConDetalles
             });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = $"Error al obtener el número de servicios: {ex.Message}" });
+            return StatusCode(500, new { message = $"Error al obtener el resumen de servicios: {ex.Message}" });
         }
     }
 
