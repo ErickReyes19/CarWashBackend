@@ -78,8 +78,6 @@ public class ReporteController : ControllerBase
     //}
 
     // Número de servicios realizados por día
-
-
     [HttpGet("numero-servicios-dia")]
     public async Task<ActionResult> GetNumeroServiciosPorDia([FromQuery] DateTime? fechaDesde, [FromQuery] DateTime? fechaHasta)
     {
@@ -92,24 +90,41 @@ public class ReporteController : ControllerBase
                                   .AddDays(1)
                                   .AddTicks(-1);
 
-            var numeroServicios = await _context.registro_servicios
+            // Consulta para obtener la lista de servicios realizados, su cantidad y las ganancias
+            var serviciosConDetalles = await _context.registro_servicios
                 .Where(r => r.fecha >= fechaDesdeSolo && r.fecha <= fechaHastaSolo)
-                .GroupJoin(
-                    _context.registro_servicio_detalles, // Unir con los detalles de servicio
+                .Join(
+                    _context.registro_servicio_detalles, // Unir con los detalles del servicio
                     r => r.id, // Relacionamos por el ID del registro de servicio
                     rsd => rsd.registro_servicio_vehiculo_id, // Relacionamos por el ID del vehículo en el detalle
-                    (r, detalles) => new
+                    (r, rsd) => new
                     {
-                        fecha = r.fecha.Date.ToString("yyyy-MM-dd"),
-                        numero_servicios = detalles.Count(), // Contamos cuántos detalles existen
-                        ganancias = detalles.Sum(d => d.precio) // Sumamos las ganancias
+                        r.fecha,
+                        rsd.servicio_id,
+                        rsd.precio
                     })
+                .Join(
+                    _context.Servicios, // Unir con la tabla de Servicios para obtener el nombre
+                    rsd => rsd.servicio_id, // Relacionamos por servicio_id
+                    s => s.id, // Relacionamos por id del servicio
+                    (rsd, s) => new
+                    {
+                        nombreServicio = s.nombre, // Obtener nombre del servicio
+                        precio = rsd.precio // Obtener el precio del detalle
+                    })
+                .GroupBy(s => s.nombreServicio) // Agrupar por nombre de servicio
+                .Select(g => new
+                {
+                    nombreServicio = g.Key,
+                    cantidad = g.Count(), // Contamos las veces que se ha realizado el servicio
+                    ganancias = g.Sum(x => x.precio) // Sumamos las ganancias por servicio
+                })
                 .ToListAsync();
 
             return Ok(new
             {
-                message = "Número de servicios realizados por día con ganancias",
-                data = numeroServicios
+                message = "Número de servicios realizados con ganancias",
+                data = serviciosConDetalles
             });
         }
         catch (Exception ex)
