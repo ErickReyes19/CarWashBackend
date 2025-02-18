@@ -71,6 +71,6 @@ public class CierreController : ControllerBase
         cierre.Total = totalCierre;
         await _context.SaveChangesAsync();
 
-        return Ok(cierre);
+        return Ok("Cierre realizado con exito");
     }
 }
