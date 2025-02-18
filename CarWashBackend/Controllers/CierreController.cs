@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+
 [Route("api/[controller]")]
 [ApiController]
-[Authorize] // Esto asegura que solo usuarios autenticados puedan acceder
+[Authorize]
 public class CierreController : ControllerBase
 {
     private readonly CarwashContext _context;
@@ -21,50 +22,55 @@ public class CierreController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CrearCierre()
     {
-        // Obtener la fecha y hora actual en Honduras
-        DateTime ahoraHonduras = TimeZoneInfo.ConvertTime(DateTime.UtcNow, _timeZoneHonduras);
-        DateTime hoy = ahoraHonduras.Date; // Solo la fecha, sin la hora
-
-        // Obtener pagos del día en Honduras
-        var pagos = await _context.pagos
-            .Where(p => TimeZoneInfo.ConvertTime(p.registro_servicio.fecha, _timeZoneHonduras).Date == hoy)
-            .ToListAsync();
-
-        if (!pagos.Any())
-        {
-            return BadRequest("No hay pagos registrados para realizar el cierre.");
-        }
-
-        // Agrupar pagos por método de pago
-        var pagosAgrupados = pagos
-            .GroupBy(p => p.metodo_pago)
-            .Select(g => new
-            {
-                MetodoPago = g.Key,
-                MontoTotal = g.Sum(p => p.monto)
-            }).ToList();
-
-        // Crear el cierre general
+        // Crear el cierre para el día
         var cierre = new Cierre
         {
-            Total = pagosAgrupados.Sum(p => p.MontoTotal),
-            Fecha = ahoraHonduras
+            Fecha = DateTime.Now,
+            Total = 0
         };
-
         _context.Cierres.Add(cierre);
-        await _context.SaveChangesAsync(); // Guardamos para obtener el ID del cierre
-
-        // Crear los detalles del cierre
-        var detalles = pagosAgrupados.Select(p => new CierreDetalle
-        {
-            CierreId = cierre.Id,
-            MetodoPago = p.MetodoPago,
-            Monto = p.MontoTotal
-        }).ToList();
-
-        _context.CierreDetalles.AddRange(detalles);
         await _context.SaveChangesAsync();
 
-        return Ok(new { mensaje = "Cierre registrado con éxito", cierre, detalles });
+        // Obtener los registros de servicio del día
+        var registros = await _context.registro_servicios
+                                      .Where(rs => rs.fecha.Date == DateTime.Today)
+                                      .Include(rs => rs.pagos)  // Incluir pagos
+                                      .Include(rs => rs.registro_servicio_vehiculos)
+                                          .ThenInclude(rs_veh => rs_veh.registro_servicio_detalles) // Incluir detalles de servicios
+                                      .ToListAsync();
+
+        decimal totalCierre = 0;
+
+        foreach (var registro in registros)
+        {
+            // Crear un CierreDetalle por cada pago
+            foreach (var pago in registro.pagos)
+            {
+                var cierreDetalle = new CierreDetalle
+                {
+                    CierreId = cierre.Id,
+                    Monto = pago.monto,
+                    MetodoPago = pago.metodo_pago
+                };
+
+                _context.CierreDetalles.Add(cierreDetalle);
+                totalCierre += pago.monto;
+            }
+
+            // Relacionar los vehículos y detalles del servicio (para tener una referencia completa)
+            foreach (var vehiculo in registro.registro_servicio_vehiculos)
+            {
+                foreach (var detalle in vehiculo.registro_servicio_detalles)
+                {
+                    // Aquí puedes hacer algo adicional con los detalles del servicio si es necesario
+                }
+            }
+        }
+
+        // Actualizar el total del Cierre
+        cierre.Total = totalCierre;
+        await _context.SaveChangesAsync();
+
+        return Ok(cierre);
     }
 }
