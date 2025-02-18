@@ -318,34 +318,48 @@ public partial class CarwashContext : DbContext
             entity.ToTable("registro_servicio");
 
             entity.HasIndex(e => e.cliente_id, "cliente_id");
-
             entity.HasIndex(e => e.estado_servicio_id, "fk_estado_servicio");
+
             entity.Property(e => e.total)
-                  .HasPrecision(10, 2) 
-                  .IsRequired()
-                  .HasDefaultValue(0); // Un valor inicial de 0
+                .HasPrecision(10, 2)
+                .IsRequired()
+                .HasDefaultValue(0); // Un valor inicial de 0
             entity.Property(e => e.id).HasMaxLength(50);
             entity.Property(e => e.cliente_id)
                 .IsRequired()
                 .HasMaxLength(50);
-            entity.Property(e => e.estado_servicio_id).HasMaxLength(36);
+            entity.Property(e => e.estado_servicio_id)
+                .HasMaxLength(36)
+                .IsRequired(false);  // Hacer que esta propiedad sea nullable
             entity.Property(e => e.fecha)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
             entity.Property(e => e.usuario_id).HasMaxLength(50);
 
-            entity.HasOne(d => d.cliente).WithMany(p => p.registro_servicios)
+            // Relación con cliente
+            entity.HasOne(d => d.cliente)
+                .WithMany(p => p.registro_servicios)
                 .HasForeignKey(d => d.cliente_id)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("registro_servicio_ibfk_1");
 
-            entity.HasOne(d => d.estado_servicio).WithMany(p => p.registro_servicios)
+            // Relación con estado_servicio
+            entity.HasOne(d => d.estado_servicio)
+                .WithMany(p => p.registro_servicios)
                 .HasForeignKey(d => d.estado_servicio_id)
-                .OnDelete(DeleteBehavior.SetNull)
+                .OnDelete(DeleteBehavior.SetNull)  // Asegurarse de que permite SetNull
                 .HasConstraintName("fk_estado_servicio");
 
-
+            // Relación con Cierre
+            entity.HasOne(d => d.Cierre)
+                .WithMany(c => c.RegistroServicios)
+                .HasForeignKey(d => d.CierreId) // Relaciona correctamente con CierreId
+                .OnDelete(DeleteBehavior.SetNull); // Elimina las filas de registro_servicio si se elimina un Cierre, pero permite nulos en la columna CierreId
         });
+
+
+
+
 
         modelBuilder.Entity<registro_servicio_detalle>(entity =>
         {
@@ -420,12 +434,13 @@ public partial class CarwashContext : DbContext
                   .IsRequired()
                   .HasDefaultValue(0);
 
-            // Relación 1:N con CierreDetalle
-            entity.HasMany(e => e.CierreDetalles)
-                  .WithOne(d => d.Cierre)
-                  .HasForeignKey(d => d.CierreId)
-                  .OnDelete(DeleteBehavior.Cascade);
+            // Relación 1:N con RegistroServicio
+            entity.HasMany(e => e.RegistroServicios)
+                  .WithOne(rs => rs.Cierre)
+                  .HasForeignKey(rs => rs.CierreId)
+                  .OnDelete(DeleteBehavior.SetNull); // Configura el comportamiento de eliminación
         });
+
 
         modelBuilder.Entity<CierreDetalle>(entity =>
         {
@@ -455,7 +470,6 @@ public partial class CarwashContext : DbContext
                   .HasForeignKey(d => d.CierreId)
                   .HasConstraintName("cierre_detalle_ibfk_1");
         });
-
 
         OnModelCreatingPartial(modelBuilder);
     }
