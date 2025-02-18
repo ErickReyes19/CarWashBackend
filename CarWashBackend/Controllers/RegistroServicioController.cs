@@ -50,7 +50,6 @@ namespace TuProyecto.Controllers
                     var empleado = await _context.Empleados.FindAsync(empleadoDto);
                     if (empleado != null)
                     {
-                        // Agregar el empleado a la colección de empleados en registro_servicio
                         registroServicio.empleados.Add(empleado);
                     }
                 }
@@ -100,18 +99,35 @@ namespace TuProyecto.Controllers
             // Establecer el total en el registro de servicio
             registroServicio.total = totalServicio;
 
-            // Añadir todo al contexto
+            // Añadir vehículos y detalles al contexto
             _context.registro_servicio_vehiculos.AddRange(registrosVehiculo);
             _context.registro_servicio_detalles.AddRange(registrosDetalle);
 
-            // Guardar todo de una vez
+            // 4. Agregar los pagos (si el DTO incluye información de pagos)
+            if (dto.Pagos != null && dto.Pagos.Any())
+            {
+                foreach (var pagoDto in dto.Pagos)
+                {
+                    var pago = new pago
+                    {
+                        id = Guid.NewGuid().ToString(),
+                        registro_servicio_id = registroServicio.id,
+                        metodo_pago = pagoDto.metodo_pago,
+                        monto = pagoDto.monto
+                    };
+
+                    _context.pagos.Add(pago);
+                }
+            }
+
+            // Guardar todos los cambios de una sola vez
             await _context.SaveChangesAsync();
 
             return Ok(new
             {
                 mensaje = "Registro de servicio para múltiples vehículos creado correctamente",
                 registroServicioId = registroServicio.id,
-                totalServicio = totalServicio // Devolver el total
+                totalServicio = totalServicio
             });
         }
 
@@ -209,6 +225,30 @@ namespace TuProyecto.Controllers
                     };
 
                     _context.registro_servicio_detalles.Add(nuevoDetalle);
+                }
+            }
+
+            if (dto.Pagos != null)
+            {
+                // 1. Eliminar pagos existentes asociados al registro de servicio
+                var pagosExistentes = _context.pagos.Where(p => p.registro_servicio_id == registroServicio.id).ToList();
+                foreach (var pago in pagosExistentes)
+                {
+                    _context.pagos.Remove(pago);
+                }
+
+                // 2. Agregar los nuevos pagos a partir del DTO
+                foreach (var pagoDto in dto.Pagos)
+                {
+                    var nuevoPago = new pago
+                    {
+                        id = Guid.NewGuid().ToString(),
+                        registro_servicio_id = registroServicio.id,
+                        metodo_pago = pagoDto.metodo_pago,
+                        monto = pagoDto.monto
+                    };
+
+                    _context.pagos.Add(nuevoPago);
                 }
             }
 

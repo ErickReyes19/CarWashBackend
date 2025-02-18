@@ -17,6 +17,13 @@ public class RegistroServicioMultipleDto
     public string EstadoServicioId { get; set; }
     public List<RegistroServicioVehiculoDto> Vehiculos { get; set; }
     public List<string> Empleados { get; set; }
+    public List<PagoDto> Pagos { get; set; } // Nueva propiedad para pagos
+}
+
+public class PagoDto
+{
+    public string metodo_pago { get; set; }
+    public decimal monto { get; set; }
 }
 
 
