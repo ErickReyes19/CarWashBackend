@@ -29,26 +29,47 @@ namespace CarWashBackend.Data
             if (!_context.Permisos.Any())
             {
                 _context.Permisos.AddRange(
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "editar_Usuario", descripcion = "Permiso para ver usuarios", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "Actualizar_vehiculo", descripcion = "Permiso para actualizar un vehiculo", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "Editar Clientes", descripcion = "Permiso para editar clientes", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_permisos", descripcion = "Permiso para ver los permisos", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "Ver Clientes", descripcion = "Permiso para ver clientes", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "Crear vehiculo", descripcion = "Permiso para crear un vehiculo", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "crear_rol", descripcion = "Permiso para crear roles", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "Acceso_Reporte_Financiero", descripcion = "Permiso para acceder a los reportes financieros del sistema", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "crear_empleados", descripcion = "Permiso para crear los empleados", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_cierres", descripcion = "Permiso para ver los Cierres", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                   
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_clientes", descripcion = "Permiso para ver clientes", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "crear_clientes", descripcion = "Permiso para crear clientes", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "editar_cliente", descripcion = "Permiso para editar clientes", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "view_cliente", descripcion = "Permiso para ver detalle de cliente", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_dashboard", descripcion = "Permiso para ver el dashboard", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+
                     new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_empleados", descripcion = "Permiso para ver los empleados", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "crear_usuario", descripcion = "Permiso para ver usuarios", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "Crear Clientes", descripcion = "Permiso para crear clientes", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "Ver_usuarios", descripcion = "Permiso para ver usuarios", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "editar_rol", descripcion = "Permiso para editar roles", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "crear_empleados", descripcion = "Permiso para crear los empleados", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "editar_empleado", descripcion = "Permiso para editar los empleados", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_estados_servicios", descripcion = "Permiso para ver los estados de servicio", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "crear_estados_servicios", descripcion = "Permiso para crear los estados de servicio", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "editar_estados_servicios", descripcion = "Permiso para editar los estados de servicio", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_permisos", descripcion = "Permiso para ver los permisos", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_registros", descripcion = "Permiso para ver un registro de servicio", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "crear_registro", descripcion = "Permiso para crear un registro de servicio", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "editar_registro", descripcion = "Permiso para editar un registro de servicio", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "view_registro", descripcion = "Permiso para ver detalle de un registro de servicio", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_roles", descripcion = "Permiso para ver roles", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "crear_roles", descripcion = "Permiso para crear roles", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "editar_roles", descripcion = "Permiso para editar roles", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+
                     new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_servicios", descripcion = "Permiso para ver los Servicios", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "Editar_servicio", descripcion = "Permiso para editar los Servicios", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "Ver_registros", descripcion = "Permiso para editar los registros de servicio", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_Registro", descripcion = "Permiso para ver un registro de servicio", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
-                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "Crear_Servicio", descripcion = "Permiso para crear los Servicios", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true }
-                );
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "crear_servicios", descripcion = "Permiso para crear los Servicios", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "editar_servicios", descripcion = "Permiso para editar los Servicios", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_usuarios", descripcion = "Permiso para ver usuarios", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "crear_usuario", descripcion = "Permiso para crear usuarios", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "editar_usuario", descripcion = "Permiso para editar usuarios", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+
+
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "ver_vehiculos", descripcion = "Permiso para ver vehiculos", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "crear_vehiculos", descripcion = "Permiso para crear vehiculos", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true },
+                    new Permiso { id = Guid.NewGuid().ToString(), nombre = "editar_vehiculo", descripcion = "Permiso para editar un vehiculo", created_at = DateTime.UtcNow, updated_at = DateTime.UtcNow, activo = true }
+                    );
                 _context.SaveChanges();
             }
 
