@@ -56,21 +56,12 @@ public class CierreController : ControllerBase
                 _context.CierreDetalles.Add(cierreDetalle);
                 totalCierre += pago.monto;
             }
-
-            // Relacionar los vehículos y detalles del servicio (para tener una referencia completa)
-            foreach (var vehiculo in registro.registro_servicio_vehiculos)
-            {
-                foreach (var detalle in vehiculo.registro_servicio_detalles)
-                {
-                    // Aquí puedes hacer algo adicional con los detalles del servicio si es necesario
-                }
-            }
+            registro.CierreId = cierre.Id;
         }
-
         // Actualizar el total del Cierre
         cierre.Total = totalCierre;
         await _context.SaveChangesAsync();
 
-        return Ok("Cierre realizado con exito");
+        return Ok("Cierre ");
     }
 }
