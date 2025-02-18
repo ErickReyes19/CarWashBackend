@@ -377,20 +377,19 @@ namespace TuProyecto.Controllers
         }
 
 
-        // GET: api/RegistroServicio/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetRegistroServicioById(string id)
         {
             var registro = await _context.registro_servicios
                 .Include(rs => rs.cliente)
                 .Include(rs => rs.estado_servicio)
-                .Include(p => p.pagos)
+                .Include(rs => rs.pagos)  // Incluir pagos
                 .Include(rs => rs.registro_servicio_vehiculos)
                     .ThenInclude(rsv => rsv.vehiculo)
                 .Include(rs => rs.registro_servicio_vehiculos)
                     .ThenInclude(rsv => rsv.registro_servicio_detalles)
                         .ThenInclude(rsd => rsd.servicio)
-                .Include(rs => rs.empleados) // Aquí accedes a la relación empleados
+                .Include(rs => rs.empleados)
                 .FirstOrDefaultAsync(rs => rs.id == id);
 
             if (registro == null)
@@ -444,7 +443,12 @@ namespace TuProyecto.Controllers
                     Nombre = rse.nombre,
                     Apellido = rse.apellido,
                     Correo = rse.correo
-                }).ToList() // Aquí mapeas los empleados
+                }).ToList(),
+                Pagos = registro.pagos.Select(p => new PagoDto
+                {
+                    metodo_pago = p.metodo_pago,
+                    monto = p.monto
+                }).ToList()
             };
 
             return Ok(dto);
