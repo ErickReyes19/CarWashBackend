@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using CarWashBackend.Data;
 using CarWashBackend.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,39 +9,19 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Cargar las variables de entorno (puedes dejarlo para otros valores si lo necesitas)
+// Cargar las variables de entorno
 builder.Configuration.AddEnvironmentVariables();
 
-// Configuración de Kestrel para escuchar en el puerto 80
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(80);  // Kestrel escuchará en el puerto 80
-});
-
-// Obtener las variables de entorno para la base de datos
+// Configuración de la base de datos y cultura
 var mysqlHost = Environment.GetEnvironmentVariable("MYSQL_HOST");
 var mysqlDatabase = Environment.GetEnvironmentVariable("MYSQL_DATABASE");
 var mysqlUser = Environment.GetEnvironmentVariable("MYSQL_USER");
 var mysqlPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD");
 var connectionString = $"server={mysqlHost};database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
 
-// Definir las credenciales de la base de datos de forma fija
-//var mysqlHost = "localhost";
-//var mysqlDatabase = "Carwash_DB";
-//var mysqlUser = "root";
-//var mysqlPassword = "P@ssWord.123";
-//var connectionString = $"server={mysqlHost};port=3306;database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
-// Construir el ConnectionString para MySQL (incluyendo el puerto 3306)
-
-// Configurar la zona horaria a Honduras
+// Configuración de la zona horaria y cultura
 var hondurasTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
-TimeZoneInfo.ClearCachedData(); // Limpiar caché de zona horaria por si acaso
-TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
-
-Console.WriteLine($"Zona horaria del sistema: {localTimeZone.Id}");
-Console.WriteLine($"Zona horaria esperada: {hondurasTimeZone.Id}");
-
-// Configurar la cultura predeterminada
+TimeZoneInfo.ClearCachedData();
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("es-HN");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("es-HN");
 
@@ -49,7 +30,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configurar el DbContext para MySQL
+// Configurar DbContext para MySQL
 builder.Services.AddDbContext<CarwashContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
 );
@@ -72,6 +53,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// Configuración de rate limiting
+builder.Services.AddInMemoryRateLimiting();
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
 // Crear un scope para ejecutar las migraciones pendientes y el seeder
@@ -81,12 +69,12 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        // Ejecutar las migraciones pendientes en la base de datos
+        // Ejecutar las migraciones pendientes
         Console.WriteLine("Aplicando migraciones...");
         context.Database.Migrate();
         Console.WriteLine("Migraciones aplicadas correctamente.");
 
-        // Ejecutar el seeder para poblar datos (si es necesario)
+        // Ejecutar el seeder para poblar datos
         var seeder = new Seeder(context, true);
         seeder.Seed();
         Console.WriteLine("Seeding completo.");
@@ -97,19 +85,23 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// Configurar Swagger para desarrollo
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// Aplicar Rate Limiting Middleware
+app.UseIpRateLimiting(); // Aplica el rate limiting en todas las peticiones
+
+// Habilitar autenticación y autorización
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Ruta raíz que responde con un mensaje y la fecha actual en zona horaria de Honduras
+// Ruta raíz
 app.MapGet("/", () =>
 {
-    // Obtener la zona horaria de Honduras
     var utcNow = DateTime.UtcNow;
     var hondurasTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, hondurasTimeZone);
 
