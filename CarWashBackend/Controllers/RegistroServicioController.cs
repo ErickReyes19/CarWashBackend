@@ -384,6 +384,7 @@ namespace TuProyecto.Controllers
             var registro = await _context.registro_servicios
                 .Include(rs => rs.cliente)
                 .Include(rs => rs.estado_servicio)
+                .Include(p => p.pagos)
                 .Include(rs => rs.registro_servicio_vehiculos)
                     .ThenInclude(rsv => rsv.vehiculo)
                 .Include(rs => rs.registro_servicio_vehiculos)

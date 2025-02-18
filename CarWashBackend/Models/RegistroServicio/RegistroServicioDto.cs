@@ -97,6 +97,7 @@ public class RegistroServicioDetailDto
     public DateTime Fecha { get; set; }
     public List<RegistroServicioVehiculoDetailDto> Vehiculos { get; set; }
     public List<EmpleadoDto> Empleados { get; set; } // Nueva propiedad para empleados
+    public List<PagoDto> Pagos { get; set; } // Nueva propiedad para empleados
 }
 
 
