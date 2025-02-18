@@ -336,7 +336,8 @@ namespace TuProyecto.Controllers
         {
             // Buscar el registro de servicio con sus relaciones
             var registroServicio = await _context.registro_servicios
-                .Include(rs => rs.empleados) // Relación con empleados
+                .Include(rs => rs.empleados) // Relación con empleados4
+                .Include(p => p.pagos) // Relación con pagos
                 .Include(rs => rs.registro_servicio_vehiculos) // Relación con vehículos
                     .ThenInclude(rsv => rsv.registro_servicio_detalles) // Relación con detalles de servicio
                 .FirstOrDefaultAsync(rs => rs.id == id);
@@ -355,6 +356,11 @@ namespace TuProyecto.Controllers
                 EstadoServicioId = registroServicio.estado_servicio_id,
                 UsuarioId = registroServicio.usuario_id,
                 Empleados = registroServicio.empleados.Select(e => e.id).ToList(),
+                Pagos = registroServicio.pagos.Select(p => new PagoDto
+                {
+                    metodo_pago = p.metodo_pago,
+                    monto = p.monto
+                }).ToList(),
                 Vehiculos = registroServicio.registro_servicio_vehiculos.Select(v => new RegistroServicioVehiculoDto
                 {
                     VehiculoId = v.vehiculo_id,
@@ -363,7 +369,8 @@ namespace TuProyecto.Controllers
                         ServicioId = d.servicio_id,
                         Precio = d.precio
                     }).ToList()
-                }).ToList()
+                }).ToList(),
+
             };
 
             return Ok(dto);
