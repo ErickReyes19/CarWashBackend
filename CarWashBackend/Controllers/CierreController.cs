@@ -79,19 +79,21 @@ public class CierreController : ControllerBase
     public async Task<IActionResult> ObtenerCierres()
     {
         var cierres = await _context.Cierres
-            .Include(c => c.CierreDetalles) // Incluir los detalles del cierre
-            .OrderByDescending(c => c.Fecha) // Ordenar por fecha descendente
+            .Include(c => c.CierreDetalles) // Incluir detalles
+            .OrderByDescending(c => c.Fecha)
             .Select(c => new
             {
                 c.Id,
                 c.Fecha,
                 c.Total,
-                Detalles = c.CierreDetalles.Select(d => new
-                {
-                    d.Id,
-                    d.Monto,
-                    d.MetodoPago
-                })
+                MetodosPago = c.CierreDetalles
+                    .GroupBy(d => d.MetodoPago)
+                    .Select(g => new
+                    {
+                        MetodoPago = g.Key,
+                        Total = g.Sum(d => d.Monto)
+                    })
+                    .ToList() // Convertir en lista
             })
             .ToListAsync();
 

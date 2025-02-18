@@ -1,0 +1,15 @@
+meta {
+  name: getCierre
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/api/cierre
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
