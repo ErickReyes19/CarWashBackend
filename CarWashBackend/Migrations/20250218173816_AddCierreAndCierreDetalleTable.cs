@@ -11,6 +11,36 @@ namespace CarWashBackend.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.UpdateData(
+                table: "registro_servicio",
+                keyColumn: "usuario_id",
+                keyValue: null,
+                column: "usuario_id",
+                value: "");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "usuario_id",
+                table: "registro_servicio",
+                type: "varchar(50)",
+                maxLength: 50,
+                nullable: false,
+                collation: "utf8mb4_0900_ai_ci",
+                oldClrType: typeof(string),
+                oldType: "varchar(50)",
+                oldMaxLength: 50,
+                oldNullable: true)
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .OldAnnotation("MySql:CharSet", "utf8mb4")
+                .OldAnnotation("Relational:Collation", "utf8mb4_0900_ai_ci");
+
+            migrationBuilder.AddColumn<string>(
+                name: "CierreId",
+                table: "registro_servicio",
+                type: "varchar(50)",
+                nullable: true,
+                collation: "utf8mb4_0900_ai_ci")
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateTable(
                 name: "cierre",
                 columns: table => new
@@ -53,19 +83,58 @@ namespace CarWashBackend.Migrations
                 .Annotation("Relational:Collation", "utf8mb4_0900_ai_ci");
 
             migrationBuilder.CreateIndex(
+                name: "IX_registro_servicio_CierreId",
+                table: "registro_servicio",
+                column: "CierreId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_cierre_detalle_CierreId",
                 table: "cierre_detalle",
                 column: "CierreId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_registro_servicio_cierre_CierreId",
+                table: "registro_servicio",
+                column: "CierreId",
+                principalTable: "cierre",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_registro_servicio_cierre_CierreId",
+                table: "registro_servicio");
+
             migrationBuilder.DropTable(
                 name: "cierre_detalle");
 
             migrationBuilder.DropTable(
                 name: "cierre");
+
+            migrationBuilder.DropIndex(
+                name: "IX_registro_servicio_CierreId",
+                table: "registro_servicio");
+
+            migrationBuilder.DropColumn(
+                name: "CierreId",
+                table: "registro_servicio");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "usuario_id",
+                table: "registro_servicio",
+                type: "varchar(50)",
+                maxLength: 50,
+                nullable: true,
+                collation: "utf8mb4_0900_ai_ci",
+                oldClrType: typeof(string),
+                oldType: "varchar(50)",
+                oldMaxLength: 50)
+                .Annotation("MySql:CharSet", "utf8mb4")
+                .OldAnnotation("MySql:CharSet", "utf8mb4")
+                .OldAnnotation("Relational:Collation", "utf8mb4_0900_ai_ci");
         }
     }
 }
