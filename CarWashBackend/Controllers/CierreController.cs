@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
@@ -22,28 +21,36 @@ public class CierreController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CrearCierre()
     {
-        // Crear el cierre para el día
+        DateTime fechaHoy = DateTime.Now.Date;
+
+        // Verificar si ya existe un cierre para el día
+        bool existeCierre = await _context.Cierres.AnyAsync(c => c.Fecha.Date == fechaHoy);
+        if (existeCierre)
+        {
+            return BadRequest(new { mensaje = "Ya existe un cierre para el día de hoy." });
+        }
+
+        // Crear el cierre
         var cierre = new Cierre
         {
-            Fecha = DateTime.Now,
+            Fecha = fechaHoy,
             Total = 0
         };
         _context.Cierres.Add(cierre);
         await _context.SaveChangesAsync();
 
-        // Obtener los registros de servicio del día
+        // Obtener registros de servicio del día
         var registros = await _context.registro_servicios
-                                      .Where(rs => rs.fecha.Date == DateTime.Today)
-                                      .Include(rs => rs.pagos)  // Incluir pagos
+                                      .Where(rs => rs.fecha.Date == fechaHoy)
+                                      .Include(rs => rs.pagos)
                                       .Include(rs => rs.registro_servicio_vehiculos)
-                                          .ThenInclude(rs_veh => rs_veh.registro_servicio_detalles) // Incluir detalles de servicios
+                                          .ThenInclude(rs_veh => rs_veh.registro_servicio_detalles)
                                       .ToListAsync();
 
         decimal totalCierre = 0;
 
         foreach (var registro in registros)
         {
-            // Crear un CierreDetalle por cada pago
             foreach (var pago in registro.pagos)
             {
                 var cierreDetalle = new CierreDetalle
@@ -56,12 +63,38 @@ public class CierreController : ControllerBase
                 _context.CierreDetalles.Add(cierreDetalle);
                 totalCierre += pago.monto;
             }
+
             registro.CierreId = cierre.Id;
+            _context.Entry(registro).State = EntityState.Modified;
         }
-        // Actualizar el total del Cierre
+
         cierre.Total = totalCierre;
         await _context.SaveChangesAsync();
 
-        return Ok("Cierre ");
+        return Ok(new { mensaje = "Cierre realizado con éxito", cierreId = cierre.Id, total = cierre.Total });
+    }
+
+    // GET: api/cierre
+    [HttpGet]
+    public async Task<IActionResult> ObtenerCierres()
+    {
+        var cierres = await _context.Cierres
+            .Include(c => c.CierreDetalles) // Incluir los detalles del cierre
+            .OrderByDescending(c => c.Fecha) // Ordenar por fecha descendente
+            .Select(c => new
+            {
+                c.Id,
+                c.Fecha,
+                c.Total,
+                Detalles = c.CierreDetalles.Select(d => new
+                {
+                    d.Id,
+                    d.Monto,
+                    d.MetodoPago
+                })
+            })
+            .ToListAsync();
+
+        return Ok(cierres);
     }
 }
