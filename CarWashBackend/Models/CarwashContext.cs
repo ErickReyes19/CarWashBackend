@@ -41,8 +41,11 @@ public partial class CarwashContext : DbContext
     public virtual DbSet<registro_servicio_detalle> registro_servicio_detalles { get; set; }
 
     public virtual DbSet<registro_servicio_vehiculo> registro_servicio_vehiculos { get; set; }
+    public DbSet<Cierre> Cierres { get; set; }
+    public DbSet<CierreDetalle> CierreDetalles { get; set; }
 
-protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 {
     var mysqlHost = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "localhost";
     var mysqlDatabase = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "Carwash_DB";
@@ -398,6 +401,61 @@ protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
                 .HasForeignKey(d => d.vehiculo_id)
                 .HasConstraintName("registro_servicio_vehiculo_ibfk_2");
         });
+        modelBuilder.Entity<Cierre>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("cierre");
+
+            entity.Property(e => e.Id)
+                  .HasMaxLength(50);
+
+            entity.Property(e => e.Fecha)
+                  .HasColumnType("datetime")
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                  .IsRequired();
+
+            entity.Property(e => e.Total)
+                  .HasPrecision(10, 2)
+                  .IsRequired()
+                  .HasDefaultValue(0);
+
+            // Relación 1:N con CierreDetalle
+            entity.HasMany(e => e.CierreDetalles)
+                  .WithOne(d => d.Cierre)
+                  .HasForeignKey(d => d.CierreId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CierreDetalle>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("cierre_detalle");
+
+            entity.Property(e => e.Id)
+                  .HasMaxLength(50);
+
+            entity.Property(e => e.CierreId)
+                  .IsRequired()
+                  .HasMaxLength(50);
+
+            entity.Property(e => e.MetodoPago)
+                  .IsRequired()
+                  .HasMaxLength(50);
+
+            entity.Property(e => e.Monto)
+                  .HasPrecision(10, 2)
+                  .IsRequired()
+                  .HasDefaultValue(0);
+
+            // La relación ya se define en Cierre, pero también podemos establecer la restricción:
+            entity.HasOne(d => d.Cierre)
+                  .WithMany(p => p.CierreDetalles)
+                  .HasForeignKey(d => d.CierreId)
+                  .HasConstraintName("cierre_detalle_ibfk_1");
+        });
+
 
         OnModelCreatingPartial(modelBuilder);
     }
