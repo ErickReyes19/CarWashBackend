@@ -7,7 +7,7 @@ namespace CarWashBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Esto asegura que solo usuarios autenticados puedan acceder
+    [Authorize] 
     public class EstadosServicioController : ControllerBase
     {
         private readonly CarwashContext _context;

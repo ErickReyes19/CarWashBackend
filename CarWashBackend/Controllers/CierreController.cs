@@ -23,14 +23,14 @@ public class CierreController : ControllerBase
     {
         DateTime fechaHoy = DateTime.Now.Date;
 
-        // Verificar si ya existe un cierre para el día
+        
         bool existeCierre = await _context.Cierres.AnyAsync(c => c.Fecha.Date == fechaHoy);
         if (existeCierre)
         {
             return BadRequest(new { mensaje = "Ya existe un cierre para el día de hoy." });
         }
 
-        // Crear el cierre
+        
         var cierre = new Cierre
         {
             Fecha = fechaHoy,
@@ -39,7 +39,7 @@ public class CierreController : ControllerBase
         _context.Cierres.Add(cierre);
         await _context.SaveChangesAsync();
 
-        // Obtener registros de servicio del día
+        
         var registros = await _context.registro_servicios
                                       .Where(rs => rs.fecha.Date == fechaHoy)
                                       .Include(rs => rs.pagos)
@@ -79,7 +79,7 @@ public class CierreController : ControllerBase
     public async Task<IActionResult> ObtenerCierres()
     {
         var cierres = await _context.Cierres
-            .Include(c => c.CierreDetalles) // Incluir detalles
+            .Include(c => c.CierreDetalles) 
             .OrderByDescending(c => c.Fecha)
             .Select(c => new
             {
@@ -93,7 +93,7 @@ public class CierreController : ControllerBase
                         MetodoPago = g.Key,
                         Total = g.Sum(d => d.Monto)
                     })
-                    .ToList() // Convertir en lista
+                    .ToList() 
             })
             .ToListAsync();
 

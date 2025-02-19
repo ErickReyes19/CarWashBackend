@@ -48,13 +48,10 @@ public class RegistroServicioDtoClienteVista
     public string Id { get; set; }
     public DateTime Fecha { get; set; }
 
-    // Incluye el estado del servicio (solo el nombre)
     public EstadoServicioDtoClienteVista EstadoServicio { get; set; }
 
-    // Lista de empleados (nombre y apellido)
     public List<EmpleadoDtoClienteVista> Empleados { get; set; } = new List<EmpleadoDtoClienteVista>();
 
-    // Lista de registros de servicio-vehículo (mínima información)
     public List<RegistroServicioVehiculoDtoClienteVista> RegistroServicioVehiculos { get; set; } = new List<RegistroServicioVehiculoDtoClienteVista>();
 }
 
@@ -72,7 +69,7 @@ public class EmpleadoDtoClienteVista
 public class RegistroServicioVehiculoDtoClienteVista
 {
     public string Id { get; set; }
-    // Esta propiedad contendrá placa, modelo y marca concatenados.
+
     public string VehiculoConcatenado { get; set; }
 
     public List<RegistroServicioDetalleDtoClienteVista> Detalles { get; set; } = new List<RegistroServicioDetalleDtoClienteVista>();

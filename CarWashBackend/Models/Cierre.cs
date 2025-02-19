@@ -6,9 +6,7 @@ public class Cierre
     public DateTime Fecha { get; set; } = DateTime.Now;
     public decimal Total { get; set; }
 
-    // Relación con el detalle de cierre
     public ICollection<CierreDetalle> CierreDetalles { get; set; } = new List<CierreDetalle>();
 
-    // Relación con registro_servicio
     public ICollection<registro_servicio> RegistroServicios { get; set; } = new List<registro_servicio>();
 }

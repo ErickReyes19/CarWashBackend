@@ -9,8 +9,6 @@
     public bool? Activo { get; set; }
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
-
-    // Solo incluir el nombre del usuario
     public string UsuarioNombre { get; set; }
 }
 

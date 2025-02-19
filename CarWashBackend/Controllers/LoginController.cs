@@ -31,10 +31,9 @@ namespace CarWashBackend.Controllers
                 return BadRequest("Usuario o contraseña no proporcionados.");
             }
 
-            // Obtener el usuario junto con su rol y los permisos del rol
             var usuario = await _context.Usuarios
-                .Include(u => u.role) // Incluir el rol
-                .ThenInclude(r => r.permisos) // Incluir los permisos del rol
+                .Include(u => u.role)  
+                .ThenInclude(r => r.permisos) 
                 .FirstOrDefaultAsync(u => u.usuario1 == loginDto.Usuario);
 
             if (usuario == null)
@@ -58,7 +57,7 @@ namespace CarWashBackend.Controllers
             };
 
             // Añadir el rol y los permisos como claims
-            claims.Add(new Claim("Rol", usuario.role.nombre)); // Añadir el nombre del rol
+            claims.Add(new Claim("Rol", usuario.role.nombre)); 
 
             if (usuario.role.activo)
             {

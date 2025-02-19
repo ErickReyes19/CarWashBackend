@@ -7,7 +7,7 @@ namespace CarWashBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Esto asegura que solo usuarios autenticados puedan acceder
+    [Authorize] 
     public class EmpleadoController : ControllerBase
     {
         private readonly CarwashContext _context;
@@ -23,13 +23,13 @@ namespace CarWashBackend.Controllers
             try
             {
                 var empleados = await _context.Empleados
-                    .Include(e => e.Usuarios) // Incluimos el usuario relacionado
+                    .Include(e => e.Usuarios) 
                     .ToListAsync();
 
                 if (empleados == null || !empleados.Any())
                     return NotFound("No se encontraron empleados.");
 
-                // Mapeamos a DTOs
+                
                 var empleadosDTO = empleados.Select(e => new EmpleadoDTO
                 {
                     Id = e.id,
@@ -42,8 +42,8 @@ namespace CarWashBackend.Controllers
 
                     CreatedAt = e.created_at,
                     UpdatedAt = e.updated_at,
-                    // Accedemos directamente al primer (y único) usuario
-                    UsuarioNombre = e.Usuarios.FirstOrDefault()?.usuario1 // El primer usuario asociado
+                    
+                    UsuarioNombre = e.Usuarios.FirstOrDefault()?.usuario1 
                 }).ToList();
 
                 return Ok(empleadosDTO);
@@ -85,7 +85,7 @@ namespace CarWashBackend.Controllers
             {
                 var empleadosActivos = await _context.Empleados
                     .Where(e => e.activo == true)
-                    .Include(e => e.Usuarios) // Incluye la relación con Usuarios
+                    .Include(e => e.Usuarios) 
                     .ToListAsync();
 
                 if (empleadosActivos == null || !empleadosActivos.Any())
@@ -102,7 +102,7 @@ namespace CarWashBackend.Controllers
                     correo = e.correo,
                     CreatedAt = e.created_at,
                     UpdatedAt = e.updated_at,
-                    UsuarioNombre = e.Usuarios.FirstOrDefault()?.usuario1 // Maneja posibles valores null
+                    UsuarioNombre = e.Usuarios.FirstOrDefault()?.usuario1 
                 }).ToList();
 
                 return Ok(empleadosDTO);
@@ -120,7 +120,7 @@ namespace CarWashBackend.Controllers
             try
             {
                 var empleado = await _context.Empleados
-                    .Include(e => e.Usuarios) // Incluye la relación con Usuarios
+                    .Include(e => e.Usuarios) 
                     .FirstOrDefaultAsync(e => e.id == id);
 
                 if (empleado == null)
@@ -139,7 +139,7 @@ namespace CarWashBackend.Controllers
                     correo = empleado.correo,
                     CreatedAt = empleado.created_at,
                     UpdatedAt = empleado.updated_at,
-                    UsuarioNombre = empleado.Usuarios.FirstOrDefault()?.usuario1 // Maneja posibles valores null
+                    UsuarioNombre = empleado.Usuarios.FirstOrDefault()?.usuario1 
                 };
 
                 return Ok(empleadoDTO);
@@ -198,7 +198,7 @@ namespace CarWashBackend.Controllers
                 if (empleadosSinUsuario == null || !empleadosSinUsuario.Any())
                     return NotFound("No se encontraron empleados sin usuario asignado.");
 
-                // Mapeamos los empleados a DTOs
+                
                 var empleadosDTO = empleadosSinUsuario.Select(e => new EmpleadoDTO
                 {
                     Id = e.id,

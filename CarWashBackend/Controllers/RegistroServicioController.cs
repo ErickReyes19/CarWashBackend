@@ -30,7 +30,7 @@ namespace TuProyecto.Controllers
                 return BadRequest("Faltan datos requeridos.");
             }
 
-            // 1. Crear el registro de servicio principal
+            
             var registroServicio = new registro_servicio
             {
                 id = Guid.NewGuid().ToString(),
@@ -42,7 +42,7 @@ namespace TuProyecto.Controllers
 
             _context.registro_servicios.Add(registroServicio);
 
-            // 2. Agregar empleados a la relación muchos a muchos
+            
             if (dto.Empleados != null && dto.Empleados.Any())
             {
                 foreach (var empleadoDto in dto.Empleados)
@@ -55,7 +55,6 @@ namespace TuProyecto.Controllers
                 }
             }
 
-            // 3. Crear los registros de vehículos y detalles de servicio, y calcular el total
             decimal totalServicio = 0;
             var registrosVehiculo = new List<registro_servicio_vehiculo>();
             var registrosDetalle = new List<registro_servicio_detalle>();
@@ -79,7 +78,7 @@ namespace TuProyecto.Controllers
                 foreach (var servicio in vehiculoDto.Servicios)
                 {
                     if (string.IsNullOrEmpty(servicio.ServicioId))
-                        continue; // o retorna error
+                        continue; 
 
                     var registroServicioDetalle = new registro_servicio_detalle
                     {
@@ -91,19 +90,15 @@ namespace TuProyecto.Controllers
 
                     registrosDetalle.Add(registroServicioDetalle);
 
-                    // Acumulamos el precio total
                     totalServicio += servicio.Precio;
                 }
             }
 
-            // Establecer el total en el registro de servicio
             registroServicio.total = totalServicio;
 
-            // Añadir vehículos y detalles al contexto
             _context.registro_servicio_vehiculos.AddRange(registrosVehiculo);
             _context.registro_servicio_detalles.AddRange(registrosDetalle);
 
-            // 4. Agregar los pagos (si el DTO incluye información de pagos)
             if (dto.Pagos != null && dto.Pagos.Any())
             {
                 foreach (var pagoDto in dto.Pagos)
@@ -120,7 +115,6 @@ namespace TuProyecto.Controllers
                 }
             }
 
-            // Guardar todos los cambios de una sola vez
             await _context.SaveChangesAsync();
 
             return Ok(new
@@ -135,7 +129,6 @@ namespace TuProyecto.Controllers
         [HttpPut("multiple")]
         public async Task<IActionResult> UpdateRegistroServicioMultiple([FromBody] RegistroServicioMultipleUpdateDto dto)
         {
-            // Validamos que el DTO contenga los datos requeridos, incluyendo el id del registro a actualizar.
             if (dto == null ||
                 string.IsNullOrEmpty(dto.RegistroServicioId) ||
                 string.IsNullOrEmpty(dto.ClienteId) ||
@@ -146,7 +139,6 @@ namespace TuProyecto.Controllers
                 return BadRequest("Faltan datos requeridos.");
             }
 
-            // Buscamos el registro de servicio a actualizar, incluyendo sus relaciones
             var registroServicio = await _context.registro_servicios
                 .Include(rs => rs.empleados)
                 .Include(rs => rs.registro_servicio_vehiculos)
@@ -158,13 +150,10 @@ namespace TuProyecto.Controllers
                 return NotFound("Registro de servicio no encontrado.");
             }
 
-            // Actualizamos los campos principales
             registroServicio.cliente_id = dto.ClienteId;
             registroServicio.estado_servicio_id = dto.EstadoServicioId;
             registroServicio.usuario_id = dto.UsuarioId;
 
-            // Actualizamos la relación muchos a muchos de empleados:
-            // Limpiamos la relación actual y agregamos los nuevos empleados
             registroServicio.empleados.Clear();
             if (dto.Empleados != null && dto.Empleados.Any())
             {
@@ -178,22 +167,17 @@ namespace TuProyecto.Controllers
                 }
             }
 
-            // Actualizamos los vehículos y sus detalles:
-            // Primero eliminamos los registros de vehículos y sus detalles actuales
             var vehiculosExistentes = registroServicio.registro_servicio_vehiculos.ToList();
             foreach (var vehiculo in vehiculosExistentes)
             {
-                // Eliminamos los detalles asociados al vehículo
                 var detalles = vehiculo.registro_servicio_detalles.ToList();
                 foreach (var detalle in detalles)
                 {
                     _context.registro_servicio_detalles.Remove(detalle);
                 }
-                // Eliminamos el registro de vehículo
                 _context.registro_servicio_vehiculos.Remove(vehiculo);
             }
 
-            // Ahora, agregamos los nuevos registros a partir del DTO
             foreach (var vehiculoDto in dto.Vehiculos)
             {
                 if (string.IsNullOrEmpty(vehiculoDto.VehiculoId) ||
@@ -230,14 +214,12 @@ namespace TuProyecto.Controllers
 
             if (dto.Pagos != null)
             {
-                // 1. Eliminar pagos existentes asociados al registro de servicio
                 var pagosExistentes = _context.pagos.Where(p => p.registro_servicio_id == registroServicio.id).ToList();
                 foreach (var pago in pagosExistentes)
                 {
                     _context.pagos.Remove(pago);
                 }
 
-                // 2. Agregar los nuevos pagos a partir del DTO
                 foreach (var pagoDto in dto.Pagos)
                 {
                     var nuevoPago = new pago
@@ -252,7 +234,6 @@ namespace TuProyecto.Controllers
                 }
             }
 
-            // Guardamos los cambios en la base de datos
             await _context.SaveChangesAsync();
 
             return Ok(new
@@ -311,17 +292,15 @@ namespace TuProyecto.Controllers
                     Fecha = rs.fecha
                 });
 
-            // Filtro por fecha desde (comparando solo la fecha)RegistroServicioSummaryDto
             if (fechaDesde.HasValue)
             {
-                var fechaInicio = fechaDesde.Value.Date; // Se usa Date para quitar la hora
+                var fechaInicio = fechaDesde.Value.Date; 
                 registrosQuery = registrosQuery.Where(rs => rs.Fecha.Date >= fechaInicio);
             }
 
-            // Filtro por fecha hasta (comparando solo la fecha)
             if (fechaHasta.HasValue)
             {
-                var fechaFin = fechaHasta.Value.Date; // Se usa Date para quitar la hora
+                var fechaFin = fechaHasta.Value.Date; 
                 registrosQuery = registrosQuery.Where(rs => rs.Fecha.Date <= fechaFin);
             }
 
@@ -334,21 +313,18 @@ namespace TuProyecto.Controllers
         [HttpGet("{id}/edit")]
         public async Task<IActionResult> GetRegistroServicioForEdit(string id)
         {
-            // Buscar el registro de servicio con sus relaciones
             var registroServicio = await _context.registro_servicios
-                .Include(rs => rs.empleados) // Relación con empleados4
-                .Include(p => p.pagos) // Relación con pagos
-                .Include(rs => rs.registro_servicio_vehiculos) // Relación con vehículos
-                    .ThenInclude(rsv => rsv.registro_servicio_detalles) // Relación con detalles de servicio
+                .Include(rs => rs.empleados) 
+                .Include(p => p.pagos) 
+                .Include(rs => rs.registro_servicio_vehiculos) 
+                    .ThenInclude(rsv => rsv.registro_servicio_detalles) 
                 .FirstOrDefaultAsync(rs => rs.id == id);
 
-            // Validar si no se encontró el registro
             if (registroServicio == null)
             {
                 return NotFound("Registro de servicio no encontrado.");
             }
 
-            // Mapear la entidad a un DTO de actualización para el fronten
             var dto = new RegistroServicioMultipleUpdateDto
             {
                 RegistroServicioId = registroServicio.id,
@@ -383,7 +359,7 @@ namespace TuProyecto.Controllers
             var registro = await _context.registro_servicios
                 .Include(rs => rs.cliente)
                 .Include(rs => rs.estado_servicio)
-                .Include(rs => rs.pagos)  // Incluir pagos
+                .Include(rs => rs.pagos)   
                 .Include(rs => rs.registro_servicio_vehiculos)
                     .ThenInclude(rsv => rsv.vehiculo)
                 .Include(rs => rs.registro_servicio_vehiculos)
@@ -397,7 +373,6 @@ namespace TuProyecto.Controllers
                 return NotFound("Registro de servicio no encontrado.");
             }
 
-            // Mapeo a DTO
             var dto = new RegistroServicioDetailDto
             {
                 Id = registro.id,

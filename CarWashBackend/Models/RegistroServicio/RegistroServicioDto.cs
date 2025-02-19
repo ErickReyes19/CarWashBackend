@@ -17,7 +17,7 @@ public class RegistroServicioMultipleDto
     public string EstadoServicioId { get; set; }
     public List<RegistroServicioVehiculoDto> Vehiculos { get; set; }
     public List<string> Empleados { get; set; }
-    public List<PagoDto> Pagos { get; set; } // Nueva propiedad para pagos
+    public List<PagoDto> Pagos { get; set; } 
 }
 
 public class PagoDto
@@ -55,7 +55,6 @@ public class UsuarioDto
 {
     public string Id { get; set; }
     //public string UsuarioNombre { get; set; }
-    // Puedes agregar otros campos relevantes
 }
 
 public class EstadosServicioDto

@@ -17,7 +17,7 @@ namespace CarWashBackend.Data
         }
         public void Seed()
         {
-            if (_resetData && !_context.Usuarios.Any()) // Solo borra si no hay usuarios
+            if (_resetData && !_context.Usuarios.Any()) 
             {
                 _context.Permisos.RemoveRange(_context.Permisos);
                 _context.Roles.RemoveRange(_context.Roles);
@@ -90,7 +90,7 @@ namespace CarWashBackend.Data
                 _context.SaveChanges();
             }
 
-            // Asignar todos los permisos al rol de Administrador si aún no están asignados
+            
             var allPermisos = _context.Permisos.ToList();
             if (!adminRole.permisos.Any())
             {
@@ -124,7 +124,7 @@ namespace CarWashBackend.Data
                 {
                     id = Guid.NewGuid().ToString(),
                     usuario1 = "Efrain.Aguirre",
-                    contrasena = "admin", // Contraseña en texto plano antes de encriptar
+                    contrasena = "admin", 
                     empleado_id = empleado.id,
                     role_id = adminRole.id,
                     created_at = DateTime.UtcNow,
@@ -132,7 +132,7 @@ namespace CarWashBackend.Data
                     activo = true
                 };
 
-                // Encriptar la contraseña antes de guardarla
+                
                 usuario.contrasena = BCrypt.Net.BCrypt.HashPassword(usuario.contrasena);
 
                 _context.Usuarios.Add(usuario);

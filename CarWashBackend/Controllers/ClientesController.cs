@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize] // Esto asegura que solo usuarios autenticados puedan acceder
+[Authorize] 
 public class ClienteController : ControllerBase
 {
     private readonly CarwashContext _context;
@@ -176,7 +176,6 @@ public class ClienteController : ControllerBase
                         RegistroServicioVehiculos = rs.registro_servicio_vehiculos.Select(rsv => new RegistroServicioVehiculoDtoClienteVista
                         {
                             Id = rsv.id,
-                            // Concatenamos los datos del vehículo: placa, modelo y marca.
                             VehiculoConcatenado = rsv.vehiculo.placa + " " + rsv.vehiculo.modelo + " " + rsv.vehiculo.marca,
                             Detalles = rsv.registro_servicio_detalles.Select(det => new RegistroServicioDetalleDtoClienteVista
                             {
