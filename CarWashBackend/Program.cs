@@ -12,12 +12,25 @@ var builder = WebApplication.CreateBuilder(args);
 // Cargar las variables de entorno
 builder.Configuration.AddEnvironmentVariables();
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(80);  // Kestrel escuchará en el puerto 80
+});
+
 // Configuración de la base de datos y cultura
 var mysqlHost = Environment.GetEnvironmentVariable("MYSQL_HOST");
 var mysqlDatabase = Environment.GetEnvironmentVariable("MYSQL_DATABASE");
 var mysqlUser = Environment.GetEnvironmentVariable("MYSQL_USER");
 var mysqlPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD");
 var connectionString = $"server={mysqlHost};database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
+
+// Definir las credenciales de la base de datos de forma fija
+//var mysqlHost = "localhost";
+//var mysqlDatabase = "Carwash_DB";
+//var mysqlUser = "root";
+//var mysqlPassword = "P@ssWord.123";
+//var connectionString = $"server={mysqlHost};port=3306;database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
+// Construir el ConnectionString para MySQL (incluyendo el puerto 3306)
 
 // Configuración de la zona horaria y cultura
 var hondurasTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
@@ -69,12 +82,12 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        // Ejecutar las migraciones pendientes
+        // Ejecutar las migraciones pendientes en la base de datos
         Console.WriteLine("Aplicando migraciones...");
         context.Database.Migrate();
         Console.WriteLine("Migraciones aplicadas correctamente.");
 
-        // Ejecutar el seeder para poblar datos
+        // Ejecutar el seeder para poblar datos (si es necesario)
         var seeder = new Seeder(context, true);
         seeder.Seed();
         Console.WriteLine("Seeding completo.");
@@ -82,7 +95,6 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         Console.WriteLine($"Error al aplicar migraciones o al ejecutar el seeder: {ex.Message}");
-        Environment.Exit(1); // Termina la aplicación si falla la migración
     }
 }
 
