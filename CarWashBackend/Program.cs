@@ -38,6 +38,7 @@ TimeZoneInfo.ClearCachedData();
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("es-HN");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("es-HN");
 
+
 // Agregar servicios al contenedor
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
