@@ -82,6 +82,7 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         Console.WriteLine($"Error al aplicar migraciones o al ejecutar el seeder: {ex.Message}");
+        Environment.Exit(1); // Termina la aplicación si falla la migración
     }
 }
 
