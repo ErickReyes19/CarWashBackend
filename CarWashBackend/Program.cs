@@ -67,11 +67,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 // Configuración de rate limiting
-builder.Services.AddInMemoryRateLimiting();
-builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
-builder.Services.AddMemoryCache();
-builder.Services.AddHttpContextAccessor();
+// Configuración de rate limiting desde el appsettings.json
+builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));  // Cargar las reglas de rate limiting desde el archivo de configuración
+builder.Services.AddInMemoryRateLimiting();  // Usar almacenamiento en memoria para las reglas de rate limiting
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();  // Configuración del rate limit
+builder.Services.AddMemoryCache();  // Habilitar almacenamiento en caché para los contadores de rate limiting
+builder.Services.AddHttpContextAccessor(); // Acceso al contexto HTTP para evaluar las peticiones
 
 var app = builder.Build();
 
@@ -105,7 +107,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Aplicar Rate Limiting Middleware
+// Aplicar Rate Limiting Middleware antes de la autenticación y autorización
 app.UseIpRateLimiting(); // Aplica el rate limiting en todas las peticiones
 
 // Habilitar autenticación y autorización
