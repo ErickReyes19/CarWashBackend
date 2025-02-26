@@ -27,7 +27,7 @@ public class CierreController : ControllerBase
         bool existeCierre = await _context.Cierres.AnyAsync(c => c.Fecha.Date == fechaHoy);
         if (existeCierre)
         {
-            return BadRequest(new { mensaje = "Ya existe un cierre para el día de hoy." });
+            return Ok(new { mensaje = "Ya existe un cierre para el día de hoy." });
         }
 
         
