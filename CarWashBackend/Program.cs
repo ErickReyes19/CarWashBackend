@@ -18,19 +18,19 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 // Configuración de la base de datos y cultura
-var mysqlHost = Environment.GetEnvironmentVariable("MYSQL_HOST");
-var mysqlDatabase = Environment.GetEnvironmentVariable("MYSQL_DATABASE");
-var mysqlUser = Environment.GetEnvironmentVariable("MYSQL_USER");
-var mysqlPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD");
-var connectionString = $"server={mysqlHost};database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
+//var mysqlHost = Environment.GetEnvironmentVariable("MYSQL_HOST");
+//var mysqlDatabase = Environment.GetEnvironmentVariable("MYSQL_DATABASE");
+//var mysqlUser = Environment.GetEnvironmentVariable("MYSQL_USER");
+//var mysqlPassword = Environment.GetEnvironmentVariable("MYSQL_PASSWORD");
+//var connectionString = $"server={mysqlHost};database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
 
 // Definir las credenciales de la base de datos de forma fija
-//var mysqlHost = "localhost";
-//var mysqlDatabase = "Carwash_DB";
-//var mysqlUser = "root";
-//var mysqlPassword = "P@ssWord.123";
-//var connectionString = $"server={mysqlHost};port=3306;database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
-// Construir el ConnectionString para MySQL (incluyendo el puerto 3306)
+var mysqlHost = "localhost";
+var mysqlDatabase = "Carwash_DB";
+var mysqlUser = "root";
+var mysqlPassword = "P@ssWord.123";
+var connectionString = $"server={mysqlHost};port=3306;database={mysqlDatabase};uid={mysqlUser};pwd={mysqlPassword}";
+//Construir el ConnectionString para MySQL (incluyendo el puerto 3306)
 
 // Configuración de la zona horaria y cultura
 var hondurasTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
@@ -41,6 +41,7 @@ CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("es-HN");
 
 // Agregar servicios al contenedor
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -64,6 +65,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") // Reemplaza con el origen de tu frontend
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials(); // Permite el uso de credenciales
+    });
+});
 
 builder.Services.AddAuthorization();
 
@@ -128,7 +139,7 @@ app.MapGet("/", () =>
         localDate = hondurasTime.ToString("yyyy-MM-ddTHH:mm:ss")
     });
 });
-
+app.UseCors("AllowSpecificOrigin");
 app.MapControllers();
-
+app.MapHub<OrderHub>("/orderHub");
 app.Run();

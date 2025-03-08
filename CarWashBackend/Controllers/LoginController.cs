@@ -32,7 +32,7 @@ namespace CarWashBackend.Controllers
             }
 
             var usuario = await _context.Usuarios
-                .Include(u => u.role)  
+                .Include(u => u.role)
                 .ThenInclude(r => r.permisos) 
                 .FirstOrDefaultAsync(u => u.usuario1 == loginDto.Usuario);
 
@@ -53,7 +53,8 @@ namespace CarWashBackend.Controllers
             var claims = new List<Claim>
             {
                 new Claim("usuario", usuario.usuario1),
-                new Claim("usuarioId", usuario.id)
+                new Claim("usuarioId", usuario.id),
+                new Claim("empleadoId", usuario.empleado_id)
             };
 
             // Añadir el rol y los permisos como claims

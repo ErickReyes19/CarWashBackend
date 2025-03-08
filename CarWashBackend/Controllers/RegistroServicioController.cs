@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using CarWashBackend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
 
 namespace TuProyecto.Controllers
 {
@@ -15,10 +16,12 @@ namespace TuProyecto.Controllers
     public class RegistroServicioController : ControllerBase
     {
         private readonly CarwashContext _context;
+        private readonly IHubContext<OrderHub> _hubContext;
 
-        public RegistroServicioController(CarwashContext context)
+        public RegistroServicioController(CarwashContext context, IHubContext<OrderHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
         [HttpPost("multiple")]
         public async Task<IActionResult> CreateRegistroServicioMultiple([FromBody] RegistroServicioMultipleDto dto)
@@ -116,6 +119,23 @@ namespace TuProyecto.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+
+            // Enviar la nueva orden a los empleados
+            if (dto.Empleados != null && dto.Empleados.Any())
+            {
+                foreach (var empleadoId in dto.Empleados)
+                {
+                    // Enviar la notificación a través de SignalR al grupo correspondiente
+                    await _hubContext.Clients.Group($"employee-{empleadoId}")
+                        .SendAsync("newOrder", new
+                        {
+                            registroServicioId = registroServicio.id,
+                            totalServicio = totalServicio,
+                            mensaje = "Se te asignó una nueva orden."
+                        });
+                }
+            }
 
             return Ok(new
             {
