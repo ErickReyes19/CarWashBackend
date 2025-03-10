@@ -4,6 +4,7 @@ using CarWashBackend.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarWashBackend.Migrations
 {
     [DbContext(typeof(CarwashContext))]
-    partial class CarwashContextModelSnapshot : ModelSnapshot
+    [Migration("20250310170456_AddProductoAndRelationTable")]
+    partial class AddProductoAndRelationTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -494,11 +497,6 @@ namespace CarWashBackend.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("varchar(36)");
 
-                    b.Property<bool?>("activo")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValueSql("'1'");
-
                     b.Property<string>("descripcion")
                         .IsRequired()
                         .HasColumnType("text");
@@ -592,20 +590,15 @@ namespace CarWashBackend.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
-                    b.Property<string>("descripcion")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("Text")
-                        .HasDefaultValueSql("Descripcion");
-
                     b.Property<string>("estado_servicio_id")
                         .HasMaxLength(36)
                         .HasColumnType("varchar(36)");
 
-                    b.Property<DateTime>("fecha")
+                    b.Property<string>("fecha")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnType("Text")
+                        .HasDefaultValueSql("Descripcion");
 
                     b.Property<decimal>("total")
                         .ValueGeneratedOnAdd()
@@ -637,9 +630,6 @@ namespace CarWashBackend.Migrations
 
                     b.Property<string>("ProductoId")
                         .HasColumnType("varchar(36)");
-
-                    b.Property<int>("Cantidad")
-                        .HasColumnType("int");
 
                     b.HasKey("RegistroServicioDetalleId", "ProductoId");
 

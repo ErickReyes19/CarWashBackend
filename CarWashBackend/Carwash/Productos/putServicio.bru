@@ -1,0 +1,25 @@
+meta {
+  name: putServicio
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{url}}/api/Servicio/51e1a9d8-11f5-447e-aaba-6e49a07b6d70
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id":"51e1a9d8-11f5-447e-aaba-6e49a07b6d70",
+    "nombre": "Lavado Exterior",
+    "descripcion": "Servicio de lavado exterior del vehículo, incluye lavado con espuma, secado y limpieza de llantas.",
+    "precio": 300.00,
+    "activo": false
+  }
+}

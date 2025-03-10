@@ -43,6 +43,8 @@ public partial class CarwashContext : DbContext
     public virtual DbSet<registro_servicio_vehiculo> registro_servicio_vehiculos { get; set; }
     public DbSet<Cierre> Cierres { get; set; }
     public DbSet<CierreDetalle> CierreDetalles { get; set; }
+    public DbSet<Producto> Productos { get; set; }
+    public DbSet<registro_servicio_detalle_producto> registro_servicio_detalle_productos { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -107,6 +109,29 @@ public partial class CarwashContext : DbContext
                         j.IndexerProperty<string>("vehiculo_id").HasMaxLength(36);
                     });
         });
+
+        modelBuilder.Entity<Producto>(entity =>
+        {
+            entity.HasKey(e => e.id).HasName("PRIMARY");
+            entity.ToTable("producto");
+
+            // Suponiendo que 'id' es string (puede ser Guid o lo que uses)
+            entity.Property(e => e.id)
+                  .HasMaxLength(36);
+
+            entity.Property(e => e.nombre)
+                  .IsRequired()
+                  .HasMaxLength(100);
+
+            entity.Property(e => e.descripcion)
+                  .HasColumnType("text");
+
+            entity.Property(e => e.precio)
+                  .HasPrecision(10, 2);
+
+            entity.Property(e => e.activo).HasDefaultValueSql("'1'");
+        });
+
 
         modelBuilder.Entity<Empleado>()
             .HasMany(e => e.registro_servicios)
@@ -228,7 +253,42 @@ public partial class CarwashContext : DbContext
             entity.Property(e => e.updated_at)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
+            entity.HasMany(e => e.Productos)
+                .WithMany(p => p.Servicios)
+                .UsingEntity<Dictionary<string, object>>(
+                    "servicio_producto",  // Nombre de la tabla de unión
+                    j => j
+                         .HasOne<Producto>()
+                         .WithMany()
+                         .HasForeignKey("producto_id")
+                         .HasConstraintName("fk_servicio_producto_producto")
+                         .OnDelete(DeleteBehavior.Cascade),
+                    j => j
+                         .HasOne<Servicio>()
+                         .WithMany()
+                         .HasForeignKey("servicio_id")
+                         .HasConstraintName("fk_servicio_producto_servicio")
+                         .OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("servicio_id", "producto_id");
+                        j.ToTable("servicio_producto");
+                    }
+                );
         });
+
+        modelBuilder.Entity<registro_servicio_detalle_producto>()
+            .HasKey(rsdp => new { rsdp.RegistroServicioDetalleId, rsdp.ProductoId });
+
+        modelBuilder.Entity<registro_servicio_detalle_producto>()
+            .HasOne(rsdp => rsdp.RegistroServicioDetalle)
+            .WithMany(rsd => rsd.RegistroServicioDetalleProductos)
+            .HasForeignKey(rsdp => rsdp.RegistroServicioDetalleId);
+
+        modelBuilder.Entity<registro_servicio_detalle_producto>()
+            .HasOne(rsdp => rsdp.Producto)
+            .WithMany(p => p.RegistroServicioDetalleProductos)
+            .HasForeignKey(rsdp => rsdp.ProductoId);
 
         modelBuilder.Entity<Usuario>(entity =>
         {
@@ -333,7 +393,10 @@ public partial class CarwashContext : DbContext
                 .IsRequired(false);  
             entity.Property(e => e.fecha)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnType("datetime");
+                .HasColumnType("datetime");            
+            entity.Property(e => e.descripcion)
+                .HasDefaultValueSql("Descripcion")
+                .HasColumnType("Text");
             entity.Property(e => e.usuario_id).HasMaxLength(50);
 
             

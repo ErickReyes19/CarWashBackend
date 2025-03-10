@@ -22,4 +22,5 @@ public partial class Servicio
     public DateTime? updated_at { get; set; }
 
     public virtual ICollection<registro_servicio_detalle> registro_servicio_detalles { get; set; } = new List<registro_servicio_detalle>();
+    public ICollection<Producto> Productos { get; set; } = new List<Producto>();
 }

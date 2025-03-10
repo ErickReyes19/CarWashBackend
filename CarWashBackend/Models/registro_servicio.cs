@@ -7,6 +7,7 @@ public partial class registro_servicio
     public string usuario_id { get; set; }
     public DateTime fecha { get; set; }
     public string estado_servicio_id { get; set; }
+    public string descripcion { get; set; }
     public decimal total { get; set; }
 
     // Nueva propiedad CierreId

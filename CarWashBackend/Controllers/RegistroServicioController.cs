@@ -23,6 +23,7 @@ namespace TuProyecto.Controllers
             _context = context;
             _hubContext = hubContext;
         }
+
         [HttpPost("multiple")]
         public async Task<IActionResult> CreateRegistroServicioMultiple([FromBody] RegistroServicioMultipleDto dto)
         {
@@ -33,7 +34,7 @@ namespace TuProyecto.Controllers
                 return BadRequest("Faltan datos requeridos.");
             }
 
-            
+            // Crear el registro del servicio
             var registroServicio = new registro_servicio
             {
                 id = Guid.NewGuid().ToString(),
@@ -45,12 +46,12 @@ namespace TuProyecto.Controllers
 
             _context.registro_servicios.Add(registroServicio);
 
-            
+            // Asociar empleados si están presentes
             if (dto.Empleados != null && dto.Empleados.Any())
             {
-                foreach (var empleadoDto in dto.Empleados)
+                foreach (var empleadoId in dto.Empleados)
                 {
-                    var empleado = await _context.Empleados.FindAsync(empleadoDto);
+                    var empleado = await _context.Empleados.FindAsync(empleadoId);
                     if (empleado != null)
                     {
                         registroServicio.empleados.Add(empleado);
@@ -62,6 +63,7 @@ namespace TuProyecto.Controllers
             var registrosVehiculo = new List<registro_servicio_vehiculo>();
             var registrosDetalle = new List<registro_servicio_detalle>();
 
+            // Recorrer vehículos y servicios asociados
             foreach (var vehiculoDto in dto.Vehiculos)
             {
                 if (string.IsNullOrEmpty(vehiculoDto.VehiculoId) || vehiculoDto.Servicios == null || !vehiculoDto.Servicios.Any())
@@ -69,6 +71,7 @@ namespace TuProyecto.Controllers
                     continue;
                 }
 
+                // Crear el registro de servicio de vehículo
                 var registroServicioVehiculo = new registro_servicio_vehiculo
                 {
                     id = Guid.NewGuid().ToString(),
@@ -78,11 +81,13 @@ namespace TuProyecto.Controllers
 
                 registrosVehiculo.Add(registroServicioVehiculo);
 
+                // Recorrer los servicios asociados a cada vehículo
                 foreach (var servicio in vehiculoDto.Servicios)
                 {
                     if (string.IsNullOrEmpty(servicio.ServicioId))
-                        continue; 
+                        continue;
 
+                    // Crear el detalle del servicio
                     var registroServicioDetalle = new registro_servicio_detalle
                     {
                         id = Guid.NewGuid().ToString(),
@@ -92,16 +97,38 @@ namespace TuProyecto.Controllers
                     };
 
                     registrosDetalle.Add(registroServicioDetalle);
-
                     totalServicio += servicio.Precio;
+
+                    
+                    if (servicio.Productos != null && servicio.Productos.Any())
+                    {
+                        foreach (var productoUsage in servicio.Productos) 
+                        {
+                            var producto = await _context.Productos.FindAsync(productoUsage.ProductoId);
+                            if (producto != null)
+                            {
+                                var detalleProducto = new registro_servicio_detalle_producto
+                                {
+                                    RegistroServicioDetalleId = registroServicioDetalle.id,
+                                    ProductoId = producto.id,
+                                    Cantidad = productoUsage.Cantidad
+                                };
+
+                                _context.registro_servicio_detalle_productos.Add(detalleProducto);
+                            }
+                        }
+                    }
+
                 }
             }
 
+            // Asignar el total al servicio
             registroServicio.total = totalServicio;
 
             _context.registro_servicio_vehiculos.AddRange(registrosVehiculo);
             _context.registro_servicio_detalles.AddRange(registrosDetalle);
 
+            // Registrar pagos si están presentes
             if (dto.Pagos != null && dto.Pagos.Any())
             {
                 foreach (var pagoDto in dto.Pagos)
@@ -120,13 +147,11 @@ namespace TuProyecto.Controllers
 
             await _context.SaveChangesAsync();
 
-
-            // Enviar la nueva orden a los empleados
+            // Enviar la nueva orden a los empleados a través de SignalR
             if (dto.Empleados != null && dto.Empleados.Any())
             {
                 foreach (var empleadoId in dto.Empleados)
                 {
-                    // Enviar la notificación a través de SignalR al grupo correspondiente
                     await _hubContext.Clients.Group($"employee-{empleadoId}")
                         .SendAsync("newOrder", new
                         {
@@ -144,6 +169,7 @@ namespace TuProyecto.Controllers
                 totalServicio = totalServicio
             });
         }
+
 
 
         [HttpPut("multiple")]

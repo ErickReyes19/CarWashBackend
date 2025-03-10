@@ -1,13 +1,17 @@
-﻿public class ServicioDto
+﻿using CarWashBackend.Models;
+
+public class ServicioDto
 {
     public string ServicioId { get; set; }
     public decimal Precio { get; set; }
+    public List<ProductoUsageDto> Productos { get; set; }
 }
 
 public class RegistroServicioVehiculoDto
 {
     public string VehiculoId { get; set; }
     public List<ServicioDto> Servicios { get; set; }
+
 }
 
 public class RegistroServicioMultipleDto
