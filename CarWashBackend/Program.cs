@@ -14,7 +14,7 @@ builder.Configuration.AddEnvironmentVariables();
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(80);  // Kestrel escuchará en el puerto 80
+    options.ListenAnyIP(8081);  // Kestrel escuchará en el puerto 8081
 });
 
 // Configuración de la base de datos y cultura
