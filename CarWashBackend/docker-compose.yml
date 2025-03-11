@@ -47,7 +47,7 @@ services:
              echo 'MySQL está listo';
              dotnet CarWashBackend.dll"
     ports:
-      - "8081:8081"
+      - "8081:80"
     networks:
       - carwash-network
 
