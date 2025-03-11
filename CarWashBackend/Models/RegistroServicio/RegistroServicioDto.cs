@@ -18,6 +18,7 @@ public class RegistroServicioMultipleDto
 {
     public string ClienteId { get; set; }
     public string UsuarioId { get; set; }
+    public string Descripcion { get; set; }
     public string EstadoServicioId { get; set; }
     public List<RegistroServicioVehiculoDto> Vehiculos { get; set; }
     public List<string> Empleados { get; set; }
