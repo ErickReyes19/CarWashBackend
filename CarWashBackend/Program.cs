@@ -14,13 +14,8 @@ builder.Configuration.AddEnvironmentVariables();
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(80); // HTTP
-    options.ListenAnyIP(443, listenOptions =>
-    {
-        listenOptions.UseHttps("/etc/ssl/certs/mycert.crt", "/etc/ssl/private/mykey_nopass.key");
-    });
+    options.ListenAnyIP(80);  // Kestrel escuchará en el puerto 80
 });
-
 
 // Configuración de la base de datos y cultura
 var mysqlHost = Environment.GetEnvironmentVariable("MYSQL_HOST");
