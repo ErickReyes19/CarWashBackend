@@ -1,0 +1,15 @@
+meta {
+  name: getProductoSelect
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{url}}/api/Servicio
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
