@@ -74,7 +74,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin", policy =>
     {
-        policy.WithOrigins("https://carwash-front-end.vercel.app/") // Reemplaza con el origen de tu frontend
+        policy.WithOrigins("https://carwash-front-end.vercel.app") // Reemplaza con el origen de tu frontend
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials(); // Permite el uso de credenciales
