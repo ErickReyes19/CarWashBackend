@@ -14,10 +14,10 @@ builder.Configuration.AddEnvironmentVariables();
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(80);  // HTTP
+    options.ListenAnyIP(80); // HTTP
     options.ListenAnyIP(443, listenOptions =>
     {
-        listenOptions.UseHttps("/https/mycert.crt", "/https/mykey.key");
+        listenOptions.UseHttps("/etc/ssl/certs/mycert.crt", "/etc/ssl/private/mykey_nopass.key");
     });
 });
 
