@@ -41,6 +41,27 @@ namespace CarWashBackend.Controllers
             {
                 return StatusCode(500, $"Error al obtener los productos: {ex.Message}");
             }
+        }       
+        [HttpGet("select")]
+        public async Task<IActionResult> GetProductosSelect()
+        {
+            try
+            {
+                var productos = await _context.Productos
+                    .Select(p => new ProductoDtoSelect
+                    {
+                        id = p.id,
+                        nombre = p.nombre,
+                        precio = p.precio
+                    })
+                    .ToListAsync();
+
+                return Ok(productos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener los productos: {ex.Message}");
+            }
         }
 
 
