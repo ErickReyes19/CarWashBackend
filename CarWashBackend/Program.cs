@@ -12,19 +12,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Cargar las variables de entorno
 builder.Configuration.AddEnvironmentVariables();
 
-//builder.WebHost.ConfigureKestrel(options =>
-//{
-//    options.ListenAnyIP(80);  // Kestrel escuchará en el puerto 8081
-//});
 builder.WebHost.ConfigureKestrel(options =>
 {
-    // Escuchar en el puerto 443 para HTTPS
+    options.ListenAnyIP(80);  // HTTP
     options.ListenAnyIP(443, listenOptions =>
     {
-        // Configura el certificado SSL para usarlo en el puerto 443
-        listenOptions.UseHttps("/etc/ssl/certs/mycert.crt", "/etc/ssl/private/mykey.key");
+        listenOptions.UseHttps("/https/mycert.crt", "/https/mykey.key");
     });
 });
+
 
 // Configuración de la base de datos y cultura
 var mysqlHost = Environment.GetEnvironmentVariable("MYSQL_HOST");
