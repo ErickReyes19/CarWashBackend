@@ -41,7 +41,8 @@ namespace TuProyecto.Controllers
                 cliente_id = dto.ClienteId,
                 estado_servicio_id = dto.EstadoServicioId,
                 usuario_id = dto.UsuarioId,
-                fecha = DateTime.Now
+                fecha = DateTime.Now,
+                descripcion = dto.Descripcion
             };
 
             _context.registro_servicios.Add(registroServicio);
