@@ -1,12 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using CarWashBackend.Models;
+﻿using CarWashBackend.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace TuProyecto.Controllers
 {
@@ -100,10 +96,10 @@ namespace TuProyecto.Controllers
                     registrosDetalle.Add(registroServicioDetalle);
                     totalServicio += servicio.Precio;
 
-                    
+                    // Procesar productos asociados y calcular su total
                     if (servicio.Productos != null && servicio.Productos.Any())
                     {
-                        foreach (var productoUsage in servicio.Productos) 
+                        foreach (var productoUsage in servicio.Productos)
                         {
                             var producto = await _context.Productos.FindAsync(productoUsage.ProductoId);
                             if (producto != null)
@@ -116,10 +112,12 @@ namespace TuProyecto.Controllers
                                 };
 
                                 _context.registro_servicio_detalle_productos.Add(detalleProducto);
+
+                                // Buscar el precio del producto, multiplicar por la cantidad y sumar al total
+                                totalServicio += producto.precio * productoUsage.Cantidad;
                             }
                         }
                     }
-
                 }
             }
 
@@ -172,7 +170,6 @@ namespace TuProyecto.Controllers
         }
 
 
-
         [HttpPut("multiple")]
         public async Task<IActionResult> UpdateRegistroServicioMultiple([FromBody] RegistroServicioMultipleUpdateDto dto)
         {
@@ -197,10 +194,13 @@ namespace TuProyecto.Controllers
                 return NotFound("Registro de servicio no encontrado.");
             }
 
+            // Actualizar propiedades básicas
             registroServicio.cliente_id = dto.ClienteId;
             registroServicio.estado_servicio_id = dto.EstadoServicioId;
             registroServicio.usuario_id = dto.UsuarioId;
+            registroServicio.descripcion = dto.Descripcion;
 
+            // Actualizar empleados
             registroServicio.empleados.Clear();
             if (dto.Empleados != null && dto.Empleados.Any())
             {
@@ -214,17 +214,27 @@ namespace TuProyecto.Controllers
                 }
             }
 
+            // Eliminar registros existentes de vehículos y sus detalles (incluyendo productos asociados)
             var vehiculosExistentes = registroServicio.registro_servicio_vehiculos.ToList();
             foreach (var vehiculo in vehiculosExistentes)
             {
                 var detalles = vehiculo.registro_servicio_detalles.ToList();
                 foreach (var detalle in detalles)
                 {
+                    // Eliminar productos asociados a cada detalle
+                    var productosDetalle = _context.registro_servicio_detalle_productos
+                        .Where(rdp => rdp.RegistroServicioDetalleId == detalle.id)
+                        .ToList();
+                    _context.registro_servicio_detalle_productos.RemoveRange(productosDetalle);
+
                     _context.registro_servicio_detalles.Remove(detalle);
                 }
                 _context.registro_servicio_vehiculos.Remove(vehiculo);
             }
 
+            decimal totalServicio = 0;
+
+            // Recorrer los vehículos nuevos y crear los registros correspondientes
             foreach (var vehiculoDto in dto.Vehiculos)
             {
                 if (string.IsNullOrEmpty(vehiculoDto.VehiculoId) ||
@@ -256,17 +266,42 @@ namespace TuProyecto.Controllers
                     };
 
                     _context.registro_servicio_detalles.Add(nuevoDetalle);
+                    totalServicio += servicio.Precio;
+
+                    // Procesar productos asociados al servicio, si existen
+                    if (servicio.Productos != null && servicio.Productos.Any())
+                    {
+                        foreach (var productoUsage in servicio.Productos)
+                        {
+                            var producto = await _context.Productos.FindAsync(productoUsage.ProductoId);
+                            if (producto != null)
+                            {
+                                var detalleProducto = new registro_servicio_detalle_producto
+                                {
+                                    RegistroServicioDetalleId = nuevoDetalle.id,
+                                    ProductoId = producto.id,
+                                    Cantidad = productoUsage.Cantidad
+                                };
+
+                                _context.registro_servicio_detalle_productos.Add(detalleProducto);
+
+                                // **Aquí se suma el precio del producto al total del servicio**
+                                totalServicio += producto.precio * productoUsage.Cantidad;
+                            }
+                        }
+                    }
                 }
             }
 
-            if (dto.Pagos != null)
-            {
-                var pagosExistentes = _context.pagos.Where(p => p.registro_servicio_id == registroServicio.id).ToList();
-                foreach (var pago in pagosExistentes)
-                {
-                    _context.pagos.Remove(pago);
-                }
+            // Actualizar el total del servicio
+            registroServicio.total = totalServicio;
 
+            // Actualizar pagos: eliminar los existentes y agregar los nuevos
+            var pagosExistentes = _context.pagos.Where(p => p.registro_servicio_id == registroServicio.id).ToList();
+            _context.pagos.RemoveRange(pagosExistentes);
+
+            if (dto.Pagos != null && dto.Pagos.Any())
+            {
                 foreach (var pagoDto in dto.Pagos)
                 {
                     var nuevoPago = new pago
@@ -276,7 +311,6 @@ namespace TuProyecto.Controllers
                         metodo_pago = pagoDto.metodo_pago,
                         monto = pagoDto.monto
                     };
-
                     _context.pagos.Add(nuevoPago);
                 }
             }
@@ -286,9 +320,12 @@ namespace TuProyecto.Controllers
             return Ok(new
             {
                 mensaje = "Registro de servicio actualizado correctamente",
-                registroServicioId = registroServicio.id
+                registroServicioId = registroServicio.id,
+                totalServicio = totalServicio
             });
         }
+
+
 
 
 
@@ -341,13 +378,13 @@ namespace TuProyecto.Controllers
 
             if (fechaDesde.HasValue)
             {
-                var fechaInicio = fechaDesde.Value.Date; 
+                var fechaInicio = fechaDesde.Value.Date;
                 registrosQuery = registrosQuery.Where(rs => rs.Fecha.Date >= fechaInicio);
             }
 
             if (fechaHasta.HasValue)
             {
-                var fechaFin = fechaHasta.Value.Date; 
+                var fechaFin = fechaHasta.Value.Date;
                 registrosQuery = registrosQuery.Where(rs => rs.Fecha.Date <= fechaFin);
             }
 
@@ -355,17 +392,21 @@ namespace TuProyecto.Controllers
 
             return Ok(registros);
         }
-         
 
         [HttpGet("{id}/edit")]
         public async Task<IActionResult> GetRegistroServicioForEdit(string id)
         {
             var registroServicio = await _context.registro_servicios
-                .Include(rs => rs.empleados) 
-                .Include(p => p.pagos) 
-                .Include(rs => rs.registro_servicio_vehiculos) 
-                    .ThenInclude(rsv => rsv.registro_servicio_detalles) 
+                .Include(rs => rs.empleados)
+                .Include(rs => rs.pagos)
+                .Include(rs => rs.registro_servicio_vehiculos)
+                    .ThenInclude(rsv => rsv.registro_servicio_detalles)
+                        .ThenInclude(d => d.RegistroServicioDetalleProductos) // Incluir productos
+                            .ThenInclude(dp => dp.Producto) // Incluir información del producto
                 .FirstOrDefaultAsync(rs => rs.id == id);
+
+
+
 
             if (registroServicio == null)
             {
@@ -376,6 +417,7 @@ namespace TuProyecto.Controllers
             {
                 RegistroServicioId = registroServicio.id,
                 ClienteId = registroServicio.cliente_id,
+                Descripcion = registroServicio.descripcion,
                 EstadoServicioId = registroServicio.estado_servicio_id,
                 UsuarioId = registroServicio.usuario_id,
                 Empleados = registroServicio.empleados.Select(e => e.id).ToList(),
@@ -390,14 +432,26 @@ namespace TuProyecto.Controllers
                     Servicios = v.registro_servicio_detalles.Select(d => new ServicioDto
                     {
                         ServicioId = d.servicio_id,
-                        Precio = d.precio
+                        Precio = d.precio,
+                        // Mapear los productos asociados: id, cantidad y total
+                        Productos = d.RegistroServicioDetalleProductos
+                            .Select(pd => new ProductoUsageDto
+                            {
+                                ProductoId = pd.ProductoId,
+                                Cantidad = pd.Cantidad,
+                                Precio = _context.Productos
+                                    .Where(p => p.id == pd.ProductoId)
+                                    .Select(p => p.precio * pd.Cantidad)
+                                    .FirstOrDefault() // Obtener el total multiplicando precio * cantidad
+                            }).ToList()
                     }).ToList()
-                }).ToList(),
-
+                }).ToList() // Aquí cerramos correctamente
             };
+
 
             return Ok(dto);
         }
+
 
 
         [HttpGet("{id}")]
@@ -406,12 +460,16 @@ namespace TuProyecto.Controllers
             var registro = await _context.registro_servicios
                 .Include(rs => rs.cliente)
                 .Include(rs => rs.estado_servicio)
-                .Include(rs => rs.pagos)   
+                .Include(rs => rs.pagos)
                 .Include(rs => rs.registro_servicio_vehiculos)
                     .ThenInclude(rsv => rsv.vehiculo)
                 .Include(rs => rs.registro_servicio_vehiculos)
                     .ThenInclude(rsv => rsv.registro_servicio_detalles)
                         .ThenInclude(rsd => rsd.servicio)
+                .Include(rs => rs.registro_servicio_vehiculos)
+                    .ThenInclude(rsv => rsv.registro_servicio_detalles)
+                        .ThenInclude(rsd => rsd.RegistroServicioDetalleProductos)
+                            .ThenInclude(rp => rp.Producto)
                 .Include(rs => rs.empleados)
                 .FirstOrDefaultAsync(rs => rs.id == id);
 
@@ -424,6 +482,7 @@ namespace TuProyecto.Controllers
             {
                 Id = registro.id,
                 Fecha = registro.fecha,
+                Descripcion = registro.descripcion,
                 Cliente = new ClienteDto
                 {
                     Id = registro.cliente.id,
@@ -456,7 +515,15 @@ namespace TuProyecto.Controllers
                     {
                         Id = rsd.id,
                         ServicioNombre = rsd.servicio.nombre,
-                        Precio = rsd.precio
+                        Precio = rsd.precio,
+                        Producto = rsd.RegistroServicioDetalleProductos.Select(rp => new ProductoUsageViewDto
+                        {
+                            ProductoId = rp.ProductoId,
+                            Nombre = rp.Producto.nombre,
+                            Cantidad = rp.Cantidad,
+                            Precio =  rp.Producto.precio
+                        }).ToList()
+
                     }).ToList()
                 }).ToList(),
                 Empleados = registro.empleados.Select(rse => new EmpleadoDto
@@ -475,6 +542,7 @@ namespace TuProyecto.Controllers
 
             return Ok(dto);
         }
+
 
 
     }

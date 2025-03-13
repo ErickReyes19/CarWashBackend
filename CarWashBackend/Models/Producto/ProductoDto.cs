@@ -26,6 +26,14 @@
     {
         public string ProductoId { get; set; }
         public int Cantidad { get; set; }
+        public decimal Precio { get; set; }
+    }
+    public class ProductoUsageViewDto
+    {
+        public string ProductoId { get; set; }
+        public int Cantidad { get; set; }
+        public decimal Precio { get; set; }
+        public string Nombre { get; set; }
     }
 
 }

@@ -83,6 +83,7 @@ public class ServicioDetailDto
     public string Id { get; set; }  // Id del registro detalle, si se requiere
     public string ServicioNombre { get; set; }
     public decimal Precio { get; set; }
+    public List<ProductoUsageViewDto> Producto { get; set; }
 }
 
 public class RegistroServicioVehiculoDetailDto
@@ -95,7 +96,9 @@ public class RegistroServicioVehiculoDetailDto
 public class RegistroServicioDetailDto
 {
     public string Id { get; set; }
+    public string Descripcion { get; set; }
     public ClienteDto Cliente { get; set; }
+
     public UsuarioDto Usuario { get; set; }
     public EstadosServicioDto EstadoServicio { get; set; }
     public DateTime Fecha { get; set; }

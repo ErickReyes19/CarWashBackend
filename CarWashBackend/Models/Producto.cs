@@ -10,3 +10,9 @@ public class Producto
     public ICollection<Servicio> Servicios { get; set; } = new List<Servicio>();
     public ICollection<registro_servicio_detalle_producto> RegistroServicioDetalleProductos { get; set; }
 }
+
+public class ProductoDtoEdit
+{
+    public string ProductoId { get; set; }
+    public int Cantidad { get; set; }
+}

@@ -16,7 +16,6 @@ public partial class registro_servicio_detalle
     public decimal precio { get; set; }
 
     public virtual registro_servicio_vehiculo registro_servicio_vehiculo { get; set; }
-    public ICollection<registro_servicio_detalle_producto> RegistroServicioDetalleProductos { get; set; }
-
+    public ICollection<registro_servicio_detalle_producto> RegistroServicioDetalleProductos { get; set; } = new List<registro_servicio_detalle_producto>();
     public virtual Servicio servicio { get; set; }
 }
