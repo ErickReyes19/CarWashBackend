@@ -108,13 +108,15 @@ namespace TuProyecto.Controllers
                                 {
                                     RegistroServicioDetalleId = registroServicioDetalle.id,
                                     ProductoId = producto.id,
-                                    Cantidad = productoUsage.Cantidad
+                                    Cantidad = productoUsage.Cantidad,
+                                    Precio = producto.precio,  // Guardar precio
+                                    Total = producto.precio * productoUsage.Cantidad  // Calcular el total
                                 };
 
                                 _context.registro_servicio_detalle_productos.Add(detalleProducto);
 
                                 // Buscar el precio del producto, multiplicar por la cantidad y sumar al total
-                                totalServicio += producto.precio * productoUsage.Cantidad;
+                                totalServicio += detalleProducto.Total;
                             }
                         }
                     }
@@ -168,6 +170,7 @@ namespace TuProyecto.Controllers
                 totalServicio = totalServicio
             });
         }
+
 
 
         [HttpPut("multiple")]
@@ -280,13 +283,15 @@ namespace TuProyecto.Controllers
                                 {
                                     RegistroServicioDetalleId = nuevoDetalle.id,
                                     ProductoId = producto.id,
-                                    Cantidad = productoUsage.Cantidad
+                                    Cantidad = productoUsage.Cantidad,
+                                    Precio = producto.precio,  // Guardar el precio del producto
+                                    Total = producto.precio * productoUsage.Cantidad  // Calcular el total del producto
                                 };
 
                                 _context.registro_servicio_detalle_productos.Add(detalleProducto);
 
-                                // **Aquí se suma el precio del producto al total del servicio**
-                                totalServicio += producto.precio * productoUsage.Cantidad;
+                                // Sumar el total del producto al total del servicio
+                                totalServicio += detalleProducto.Total;
                             }
                         }
                     }

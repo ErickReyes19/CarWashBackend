@@ -280,6 +280,21 @@ public partial class CarwashContext : DbContext
         modelBuilder.Entity<registro_servicio_detalle_producto>()
             .HasKey(rsdp => new { rsdp.RegistroServicioDetalleId, rsdp.ProductoId });
 
+        modelBuilder.Entity<registro_servicio_detalle_producto>(entity =>
+        {
+            // Configurar el campo Precio con precisión 10,2
+            entity.Property(rsdp => rsdp.Precio)
+                .HasPrecision(10, 2)
+                .IsRequired();  // Si quieres hacerlo obligatorio, si no, elimina IsRequired()
+
+            // Configurar el campo Total con precisión 10,2
+            entity.Property(rsdp => rsdp.Total)
+                .HasPrecision(10, 2)
+                .IsRequired();  // Si quieres hacerlo obligatorio, si no, elimina IsRequired()
+        });
+
+
+
         modelBuilder.Entity<registro_servicio_detalle_producto>()
             .HasOne(rsdp => rsdp.RegistroServicioDetalle)
             .WithMany(rsd => rsd.RegistroServicioDetalleProductos)
