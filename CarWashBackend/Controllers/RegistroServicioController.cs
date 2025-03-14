@@ -444,10 +444,9 @@ namespace TuProyecto.Controllers
                             {
                                 ProductoId = pd.ProductoId,
                                 Cantidad = pd.Cantidad,
-                                Precio = _context.Productos
-                                    .Where(p => p.id == pd.ProductoId)
-                                    .Select(p => p.precio * pd.Cantidad)
-                                    .FirstOrDefault() // Obtener el total multiplicando precio * cantidad
+                                Precio = pd.Precio,
+                                Total = pd.Total
+
                             }).ToList()
                     }).ToList()
                 }).ToList() // Aquí cerramos correctamente
@@ -526,7 +525,8 @@ namespace TuProyecto.Controllers
                             ProductoId = rp.ProductoId,
                             Nombre = rp.Producto.nombre,
                             Cantidad = rp.Cantidad,
-                            Precio =  rp.Producto.precio
+                            Precio =  rp.Precio,
+                            Total = rp.Total
                         }).ToList()
 
                     }).ToList()
