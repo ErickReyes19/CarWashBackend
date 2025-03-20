@@ -384,13 +384,13 @@ namespace TuProyecto.Controllers
             if (fechaDesde.HasValue)
             {
                 var fechaInicio = fechaDesde.Value.Date;
-                registrosQuery = registrosQuery.Where(rs => rs.Fecha.Date >= fechaInicio);
+                registrosQuery = registrosQuery.Where(rs => EF.Functions.DateDiffDay(rs.Fecha, fechaInicio) <= 0);
             }
 
             if (fechaHasta.HasValue)
             {
                 var fechaFin = fechaHasta.Value.Date;
-                registrosQuery = registrosQuery.Where(rs => rs.Fecha.Date <= fechaFin);
+                registrosQuery = registrosQuery.Where(rs => EF.Functions.DateDiffDay(rs.Fecha, fechaFin) >= 0);
             }
 
             var registros = await registrosQuery.ToListAsync();
