@@ -16,23 +16,36 @@ auth:bearer {
 
 body:json {
   {
-    "clienteId": "62ff9fae-8fc5-487d-9fa7-d9cb28f7e684",
-    "estadoServicioId": "3b83bc9d-20d8-48ee-9d7d-2acda3829f2b",
+  
+    "ClienteId": "62ff9fae-8fc5-487d-9fa7-d9cb28f7e684",
+    "EstadoServicioId": "3b83bc9d-20d8-48ee-9d7d-2acda3829f2b",
+    "Descripcion": "HOLAs",
     "UsuarioId": "23cd5515-4ae8-4c0a-b4f1-336fcad4b8f4",
     "Empleados": [
       "0470b519-3cb0-4568-a655-341f44f82bd6"
     ],
-    "vehiculos": [
+    "Vehiculos": [
       {
-        "vehiculoId": "4d23212e-d876-4c32-a51d-862fef2f9707",
-        "servicios": [
+        "VehiculoId": "4d23212e-d876-4c32-a51d-862fef2f9707",
+        "Servicios": [
           {
-            "servicioId": "80d778eb-5381-4d12-83dc-7fbb7332d2e1",
-            "precio": 200
+            "ServicioId": "80d778eb-5381-4d12-83dc-7fbb7332d2e1",
+            "Precio": 200,
+            "Total": 200,
+            "Productos": []
           },
           {
-            "servicioId": "902c4121-9155-4d2d-8a9b-833dca01bfa3",
-            "precio": 150
+            "ServicioId": "902c4121-9155-4d2d-8a9b-833dca01bfa3",
+            "Precio": 150,
+            "Total": 150,
+            "Productos": [
+              {
+                "ProductoId": "productoId_1",  
+                "Cantidad": 100,
+                "Precio": 1.50,  
+                "Total": 150  
+              }
+            ]
           }
         ]
       }
@@ -40,12 +53,13 @@ body:json {
     "Pagos": [
       {
         "metodo_pago": "efectivo",
-        "monto": 60.00
+        "Monto": 60.00
       },
       {
         "metodo_pago": "tarjeta",
-        "monto": 60.00
+        "Monto": 60.00
       }
     ]
   }
+  
 }
